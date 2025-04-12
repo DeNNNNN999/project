@@ -8,11 +8,11 @@
   "author": "DeNNNNN999",
   "scripts": {
     "dev": "node copy-mdx.js && vite --port 3000 --host",
-    "build": "node copy-mdx.js && vite build && node fix-gh-pages.js",
+    "build": "vite build && node fix-gh-pages.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
-    "deploy": "node fix-for-github.js && npx gh-pages -d dist"
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@iconify/react": "^5.2.0",
@@ -24,7 +24,6 @@
     "@react-three/drei": "^10.0.4",
     "@react-three/fiber": "^9.1.0",
     "framer-motion": "^11.0.8",
-    "motion": "^12.4.7",
     "gsap": "^3.12.7",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",

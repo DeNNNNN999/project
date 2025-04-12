@@ -1,25 +1,19 @@
-import { readFileSync, writeFileSync, existsSync } from 'fs';
-import { resolve } from 'path';
+import fs from 'fs';
+import path from 'path';
 import { fileURLToPath } from 'url';
 
-const __filename = fileURLToPath(import.meta.url);
-const __dirname = path.dirname(__filename);
+const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-// Функция для создания файла 404.html (для работы маршрутизации на GitHub Pages)
-function createNotFoundPage() {
-  console.log('Creating 404.html file...');
-  const htmlPath = resolve(__dirname, 'dist', 'index.html');
+try {
+  const indexPath = path.join(__dirname, 'dist', 'index.html');
+  const notFoundPath = path.join(__dirname, 'dist', '404.html');
   
-  if (existsSync(htmlPath)) {
-    const content = readFileSync(htmlPath);
-    writeFileSync(resolve(__dirname, 'dist', '404.html'), content);
-    console.log('404.html created successfully!');
+  if (fs.existsSync(indexPath)) {
+    fs.copyFileSync(indexPath, notFoundPath);
+    console.log('Successfully created 404.html');
   } else {
-    console.error('Error: Could not find dist/index.html');
+    console.error('dist/index.html not found');
   }
+} catch (error) {
+  console.error('Error:', error);
 }
-
-// Создаем 404.html для правильной работы маршрутизации
-createNotFoundPage();
-
-console.log('GitHub Pages fix completed successfully!');
