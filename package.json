@@ -8,7 +8,7 @@
   "author": "DeNNNNN999",
   "scripts": {
     "dev": "node copy-mdx.js && vite --port 3000 --host",
-    "build": "vite build && node fix-gh-pages.js",
+    "build": "node copy-mdx.js && vite build && node fix-gh-pages.js",
     "lint": "eslint .",
     "preview": "vite preview",
     "predeploy": "npm run build",
