@@ -1,15 +1,18 @@
-// Скрипт для исправления путей после сборки для GitHub Pages
-const fs = require('fs');
-const path = require('path');
+import { readFileSync, writeFileSync, existsSync } from 'fs';
+import { resolve } from 'path';
+import { fileURLToPath } from 'url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
 
 // Функция для создания файла 404.html (для работы маршрутизации на GitHub Pages)
 function createNotFoundPage() {
   console.log('Creating 404.html file...');
-  const htmlPath = path.resolve(__dirname, 'dist', 'index.html');
+  const htmlPath = resolve(__dirname, 'dist', 'index.html');
   
-  if (fs.existsSync(htmlPath)) {
-    const content = fs.readFileSync(htmlPath);
-    fs.writeFileSync(path.resolve(__dirname, 'dist', '404.html'), content);
+  if (existsSync(htmlPath)) {
+    const content = readFileSync(htmlPath);
+    writeFileSync(resolve(__dirname, 'dist', '404.html'), content);
     console.log('404.html created successfully!');
   } else {
     console.error('Error: Could not find dist/index.html');
