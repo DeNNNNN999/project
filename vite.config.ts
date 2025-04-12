@@ -18,6 +18,8 @@ export default defineConfig({
           }
         }
       }
-    }
-  }
+    },
+    assetsDir: './'
+  },
+  publicDir: './public',
 });

@@ -37,9 +37,9 @@ const MdxContentLoader: React.FC<MdxContentLoaderProps> = ({ lessonNumber, docFo
       try {
         setIsLoading(true);
         
-        // Используем fetch для получения MDX-файла как текста
-        // Важно: обратите внимание, что путь начинается со слеша, что указывает на корень публичной директории
-        const response = await fetch(`/${docFolder}/${lessonNumber}.mdx`);
+        // Добавляем base path для GitHub Pages
+        const basePath = import.meta.env.MODE === 'production' ? '/project' : '';
+        const response = await fetch(`${basePath}/${docFolder}/${lessonNumber}.mdx`);
         
         if (!response.ok) {
           throw new Error(`Ошибка загрузки урока ${lessonNumber}: ${response.status}`);
@@ -49,7 +49,7 @@ const MdxContentLoader: React.FC<MdxContentLoaderProps> = ({ lessonNumber, docFo
         setContent(text);
         setError(null);
         
-        console.log(`Успешно загружен файл /${docFolder}/${lessonNumber}.mdx`);
+        console.log(`Успешно загружен файл ${basePath}/${docFolder}/${lessonNumber}.mdx`);
       } catch (err) {
         console.error('Failed to load MDX content:', err);
         setError(`Не удалось загрузить урок из "${docFolder}/${lessonNumber}.mdx". Пожалуйста, проверьте правильность пути и наличие файла.`);
