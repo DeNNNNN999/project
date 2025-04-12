@@ -1,0 +1,349 @@
+/* Защита от копирования контента */
+body {
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
+  user-select: none;
+}
+
+/* Разрешаем выделение текста в текстовых полях */
+input, textarea {
+  -webkit-user-select: text;
+  -moz-user-select: text;
+  -ms-user-select: text;
+  user-select: text;
+}
+
+/* Защита изображений */
+img {
+  pointer-events: none;
+  -webkit-user-drag: none;
+  -webkit-touch-callout: none;
+}
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
+  line-height: 1.5;
+  font-weight: 400;
+
+  color-scheme: dark;
+  color: rgba(255, 255, 255, 0.87);
+  background-color: #0f172a;
+
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+body {
+  margin: 0;
+  padding: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* Паттерны для фона */
+.bg-grid-pattern {
+  background-image: linear-gradient(rgba(57, 80, 155, 0.1) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(57, 80, 155, 0.1) 1px, transparent 1px);
+  background-size: 20px 20px;
+}
+
+.bg-dots-pattern {
+  background-image: radial-gradient(rgba(148, 85, 211, 0.2) 1px, transparent 1px);
+  background-size: 16px 16px;
+}
+
+/* Анимации */
+@keyframes gradient-shift {
+  0% {
+    opacity: 0;
+  }
+  50% {
+    opacity: 0.5;
+  }
+  100% {
+    opacity: 0;
+  }
+}
+
+.animate-gradient-shift {
+  animation: gradient-shift 10s ease-in-out infinite;
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fadeIn {
+  animation: fadeIn 0.5s ease-out forwards;
+}
+
+/* Анимированные градиенты */
+@keyframes gradient-x {
+  0% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+  100% {
+    background-position: 0% 50%;
+  }
+}
+
+.animate-gradient-x {
+  background-size: 200% 200%;
+  animation: gradient-x 15s ease infinite;
+}
+
+/* Пульсация */
+@keyframes pulse-subtle {
+  0%, 100% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.7;
+  }
+}
+
+.animate-pulse-subtle {
+  animation: pulse-subtle 3s ease-in-out infinite;
+}
+
+/* Плавное появление для элементов по мере скролла */
+@media (prefers-reduced-motion: no-preference) {
+  .prose h1, .prose h2, .prose h3, .prose h4, .prose p, .prose ul {
+    opacity: 0;
+    transform: translateY(10px);
+    animation: fadeIn 0.5s ease-out forwards;
+    animation-delay: calc(var(--scroll-mt, 0) * 0.1s);
+  }
+  
+  .prose h1 {
+    --scroll-mt: 1;
+  }
+  
+  .prose h2 {
+    --scroll-mt: 2;
+  }
+  
+  .prose h3 {
+    --scroll-mt: 3;
+  }
+  
+  .prose p {
+    --scroll-mt: 4;
+  }
+  
+  .prose ul {
+    --scroll-mt: 5;
+  }
+}
+
+/* Стили для кода */
+pre code {
+  font-family: 'Fira Code', 'Roboto Mono', monospace;
+}
+
+/* Стили для блока с MarkDown */
+.prose h1, .prose h2, .prose h3, .prose h4 {
+  margin-top: 1.5em;
+  margin-bottom: 0.5em;
+  padding-top: 0.5em;
+}
+
+.prose h1 {
+  font-size: 2rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.2);
+  padding-bottom: 0.5rem;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0.7));
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.prose h2 {
+  font-size: 1.5rem;
+  color: rgba(255, 255, 255, 0.95);
+  border-left: 3px solid rgba(124, 58, 237, 0.5);
+  padding-left: 0.75rem;
+}
+
+.prose h3 {
+  font-size: 1.25rem;
+  color: rgba(255, 255, 255, 0.9);
+}
+
+.prose code {
+  border-radius: 0.25rem;
+  padding: 0.125rem 0.25rem;
+  background-color: rgba(30, 41, 59, 0.8);
+  font-size: 0.875rem;
+  color: #93c5fd;
+  transition: background-color 0.2s;
+}
+
+.prose code:hover {
+  background-color: rgba(30, 41, 59, 1);
+}
+
+.prose pre {
+  background-color: rgba(30, 41, 59, 0.8);
+  border-radius: 0.5rem;
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  padding: 1rem;
+  margin: 1.5rem 0;
+  overflow-x: auto;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  transition: transform 0.2s, box-shadow 0.2s;
+}
+
+.prose pre:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+}
+
+.prose pre code {
+  background-color: transparent;
+  padding: 0;
+  color: #e2e8f0;
+}
+
+.prose table {
+  width: 100%;
+  border-collapse: collapse;
+  margin: 1.5rem 0;
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+}
+
+.prose table th,
+.prose table td {
+  border: 1px solid rgba(71, 85, 105, 0.5);
+  padding: 0.5rem;
+  text-align: left;
+  transition: background-color 0.2s;
+}
+
+.prose table th {
+  background-color: rgba(30, 41, 59, 0.8);
+  font-weight: 600;
+}
+
+.prose table tr:hover td {
+  background-color: rgba(30, 41, 59, 0.5);
+}
+
+.prose ul, .prose ol {
+  padding-left: 1.5rem;
+  margin: 1rem 0;
+}
+
+.prose li {
+  margin: 0.25rem 0;
+  position: relative;
+}
+
+.prose li::before {
+  content: '';
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background-color: rgba(124, 58, 237, 0.5);
+  left: -1rem;
+  top: 0.6rem;
+  transform: scale(0);
+  animation: fadeIn 0.3s forwards;
+  animation-delay: calc(var(--li-index, 0) * 0.1s + 0.2s);
+}
+
+.prose li:nth-child(1) {
+  --li-index: 1;
+}
+
+.prose li:nth-child(2) {
+  --li-index: 2;
+}
+
+.prose li:nth-child(3) {
+  --li-index: 3;
+}
+
+.prose li:nth-child(4) {
+  --li-index: 4;
+}
+
+.prose li:nth-child(5) {
+  --li-index: 5;
+}
+
+.prose hr {
+  border: 0;
+  height: 1px;
+  background: linear-gradient(to right, transparent, rgba(71, 85, 105, 0.5), transparent);
+  margin: 2rem 0;
+}
+
+.prose p {
+  margin: 1rem 0;
+  line-height: 1.7;
+}
+
+.prose strong {
+  color: white;
+  font-weight: 600;
+}
+
+.prose em {
+  color: #cbd5e1;
+  font-style: italic;
+}
+
+/* Интерактивные кнопки */
+button {
+  position: relative;
+  overflow: hidden;
+}
+
+button::after {
+  content: '';
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 5px;
+  height: 5px;
+  background: rgba(255, 255, 255, 0.5);
+  opacity: 0;
+  border-radius: 100%;
+  transform: scale(1, 1) translate(-50%);
+  transform-origin: 50% 50%;
+}
+
+@keyframes ripple {
+  0% {
+    transform: scale(0, 0);
+    opacity: 0.5;
+  }
+  100% {
+    transform: scale(50, 50);
+    opacity: 0;
+  }
+}
+
+button:focus:not(:active)::after {
+  animation: ripple 0.8s ease-out;
+}

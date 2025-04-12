@@ -1,0 +1,121 @@
+Тема #12: Условные (Conditional) и Отображаемые (Mapped) Типы
+
+Эти конструкции работают исключительно во время компиляции и полностью стираются при генерации JavaScript кода. Их цель — дать разработчику инструменты для создания сложных, но при этом переиспользуемых и типобезопасных абстракций.
+
+1. Отображаемые Типы (Mapped Types) – Трансформация Формы Объектов
+
+Идея: Позволяют создать новый тип объекта, беря за основу ключи существующего типа (T) и применяя к каждому свойству некую трансформацию. Это способ программно определить структуру нового типа на основе старого, не перечисляя все свойства вручную (принцип DRY для типов).
+Синтаксис: {[K in keyof T]: NewType}
+keyof T: Оператор, возвращающий объединение (union) всех публичных ключей типа T (как строковых, так и символьных литеральных типов).
+K in ...: Аналогично циклу for...in, но на уровне типов — перебирает каждый ключ K из объединения keyof T.
+NewType: Тип, который будет присвоен свойству с ключом K в новом типе. Часто зависит от K и/или T[K] (тип оригинального свойства).
+Модификаторы readonly и ?: Можно добавлять или удалять эти модификаторы с помощью префиксов + (добавить, по умолчанию) или - (удалить).
+Примеры (как работают встроенные утилиты):
+TypeScript
+
+interface User {
+  id: number;
+  name: string;
+  isAdmin?: boolean; // Необязательное
+  readonly registrationDate: Date; // Только для чтения
+}
+
+// Пример 1: Readonly<T> - делает все свойства readonly
+type Readonly<T> = {
+  readonly [P in keyof T]: T[P]; // Добавляем readonly к каждому свойству P типа T[P]
+};
+type ReadonlyUser = Readonly<User>;
+// Эквивалентно: { readonly id: number; readonly name: string; readonly isAdmin?: boolean; readonly registrationDate: Date; }
+
+// Пример 2: Partial<T> - делает все свойства необязательными
+type Partial<T> = {
+  [P in keyof T]?: T[P]; // Добавляем '?' к каждому свойству
+};
+type PartialUser = Partial<User>;
+// Эквивалентно: { id?: number; name?: string; isAdmin?: boolean; registrationDate?: Date; }
+
+// Пример 3: Required<T> - делает все свойства обязательными
+type Required<T> = {
+  [P in keyof T]-?: T[P]; // Убираем '?' у каждого свойства
+};
+type RequiredUser = Required<User>;
+// Эквивалентно: { id: number; name: string; isAdmin: boolean; registrationDate: Date; }
+// (Обрати внимание, isAdmin стал обязательным!)
+
+// Пример 4: Pick<T, K> - выбирает только нужные ключи
+type Pick<T, K extends keyof T> = {
+    [P in K]: T[P]; // Итерируем только по ключам K, которые являются подмножеством keyof T
+};
+type UserCredentials = Pick<User, "name" | "isAdmin">;
+// Эквивалентно: { name: string; isAdmin?: boolean | undefined; }
+Критический взгляд: Mapped Types — незаменимый инструмент для создания вариаций типов (Readonly, Partial), выбора/исключения свойств (Pick, Omit) и других трансформаций форм объектов без повторения кода. Требуют хорошего понимания keyof и индексированных типов доступа (T[K]).
+2. Условные Типы (Conditional Types) – Логика на Уровне Типов
+
+Идея: Позволяют определить тип на основе условия, проверяемого во время компиляции. Работают как тернарный оператор (? :), но для типов.
+Синтаксис: SomeType extends OtherType ? TrueType : FalseType;
+Если тип SomeType совместим (assignable) с типом OtherType, то результатом будет TrueType.
+Иначе результатом будет FalseType.
+Пример:
+TypeScript
+
+type IsString<T> = T extends string ? true : false;
+
+type Result1 = IsString<"hello">; // Тип Result1: true
+type Result2 = IsString;     // Тип Result2: false
+
+// Пример: Получить имя типа для примитивов
+type TypeName<T> =
+    T extends string ? "string" :
+    T extends number ? "number" :
+    T extends boolean ? "boolean" :
+    T extends undefined ? "undefined" :
+    T extends function ? "function" :
+    "object";
+
+let typeName1: TypeName<string[]> = "object";
+let typeName2: TypeName<() => void> = "function";
+let typeName3: TypeName<null> = "object"; // typeof null === 'object'!
+Распределение над Объединениями (Distributive Conditional Types): Когда проверяемый тип T в T extends U является параметром-дженериком, и ему передается объединение (union), условный тип применяется к каждому члену объединения по отдельности, и результаты затем снова объединяются.
+TypeScript
+
+type ToString<T> = T extends string | number ? string : T;
+
+// Как работает для T = string | boolean:
+// 1. IsString<string> -> string
+// 2. IsString<boolean> -> boolean
+// 3. Result = string | boolean
+type ResultUnion = ToString<string | boolean>; // Тип: string | boolean
+Критический взгляд: Распределение — очень мощно, но может быть неожиданным. Чтобы его отключить (применить условие ко всему объединению как к единому целому), нужно обернуть части в квадратные скобки: [T] extends [U] ? ... : ....
+Ключевое слово infer – Извлечение Типов:
+Используется только внутри extends в условных типах.
+Позволяет "захватить" (вывести) часть проверяемого типа в новую переменную типа.
+Пример (как работает ReturnType<T>):
+TypeScript
+
+// Определяем утилиту GetReturnType
+type GetReturnType<T> =
+  T extends (...args: any[]) => infer R // Если T - это функция...
+    ? R // ... то захвати тип ее возврата (R) и верни его
+    : any; // иначе верни any (или never/unknown)
+
+function getUser(id: number): { name: string, age: number } {
+  return { name: "Test", age: id };
+}
+
+// Используем нашу утилиту
+type UserReturnType = GetReturnType<typeof getUser>;
+// UserReturnType теперь { name: string; age: number; }
+
+let u: UserReturnType = { name: "Jane", age: 25 }; // OK
+Критический взгляд: infer — это суперсила условных типов. Она позволяет "заглядывать внутрь" сложных типов (функций, промисов, массивов, кортежей) и извлекать их части, что необходимо для создания многих продвинутых утилитарных типов (Parameters, ReturnType, Awaited и т.д.).
+3. Сложность и Читаемость
+
+Критический взгляд: Mapped и Conditional типы (особенно с infer и рекурсией) могут стать очень сложными для написания, чтения и отладки ("Type Tetris"). Легко создать тип, который работает не совсем так, как ожидалось. Они также могут увеличивать время компиляции на больших проектах.
+Рекомендации:
+Используйте встроенные Utility Types (Тема #16), где это возможно — они хорошо протестированы и понятны большинству разработчиков.
+При написании своих сложных типов документируйте их с помощью комментариев.
+Разбивайте очень сложные типы на более мелкие, переиспользуемые части.
+Давайте типам осмысленные имена.
+Итог по Теме #12:
+
+Mapped и Conditional типы — это инструменты "метапрограммирования" на уровне типов в TypeScript. Они открывают огромные возможности для создания гибких, переиспользуемых и безопасных типовых абстракций. Mapped Types трансформируют формы объектов, Conditional Types позволяют писать логику ветвления для типов, а infer дает возможность "извлекать" типы из других типов. Это основа многих Utility Types и сложных библиотечных деклараций. Однако их использование требует глубокого понимания и может значительно усложнить код типов, если применять их бездумно.

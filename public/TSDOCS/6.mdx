@@ -1,0 +1,133 @@
+Тема #6: Дженерики (Generics) в TypeScript
+
+1. Что это и Зачем?
+
+Представь, что тебе нужна функция, которая просто возвращает то, что ей передали (identity function). На чистом JS это просто: function identity(arg) { return arg; }. Но как типизировать это в TS?
+
+Вариант 1: Конкретный тип - не универсально:
+TypeScript
+
+function identityString(arg: string): string { return arg; }
+function identityNumber(arg: number): number { return arg; }
+// Придется писать N функций для N типов... Плохо!
+Вариант 2: any - небезопасно:
+TypeScript
+
+function identityAny(arg: any): any { return arg; }
+let output = identityAny("hello"); // output теперь тоже 'any', информация о типе 'string' потеряна!
+let num: number = output; // Ошибки НЕТ на этапе компиляции, но будет в рантайме!
+Вариант 3: Дженерики (Generics) - универсально и безопасно:
+TypeScript
+
+function identity<T>(arg: T): T { // <T> - объявляем параметр типа T
+  return arg;                   // Используем T как тип аргумента и возвращаемого значения
+}
+
+// Используем:
+let output1 = identity<string>("myString"); // Явно указываем T = string. output1 имеет тип 'string'.
+let output2 = identity("myString");       // TS сам выводит T = string. output2 имеет тип 'string'.
+let output3 = identity<number>(123);      // output3 имеет тип 'number'.
+let output4 = identity(123);            // TS сам выводит T = number. output4 имеет тип 'number'.
+
+// let numTest: number = identity("not a number"); // ОШИБКА Компиляции! Type 'string' is not assignable to type 'number'.
+                                           // Безопасность сохранена!
+Суть дженериков: Создание шаблонов для функций, классов, интерфейсов или типов, которые могут работать с разными типами, указанными позже (как аргументы типа), при этом сохраняя типовую связь между входом и выходом (или внутри структуры). T здесь — это параметр типа (placeholder).
+
+2. Где используются Дженерики:
+
+Функции: Как в примере identity.
+Псевдонимы типов (type):
+TypeScript
+
+type Nullable<T> = T | null | undefined;
+type ResponseData<T> = { success: boolean; data: T; };
+
+let name: Nullable<string> = "Alice";
+let age: Nullable<number> = null;
+let apiResult: ResponseData<{ id: number; value: string }> = { success: true, data: { id: 1, value: "ok" } };
+Интерфейсы (interface):
+TypeScript
+
+interface Box<ContentType> { // Используем ContentType вместо T для ясности
+  content: ContentType;
+  label?: string;
+}
+let numberBox: Box<number> = { content: 100 };
+let stringBox: Box<string> = { content: "hello", label: "Greeting" };
+Классы (class):
+TypeScript
+
+class DataStorage<T> {
+  private data: T[] = [];
+  add(item: T): void { this.data.push(item); }
+  getAll(): T[] { return this.data; }
+}
+let stringStore = new DataStorage<string>();
+stringStore.add("one");
+// stringStore.add(1); // Ошибка! Argument of type 'number' is not assignable...
+console.log(stringStore.getAll()); // ["one"]
+
+let numberStore = new DataStorage<number>(); // Тип T выводится как number из usage
+numberStore.add(10);
+console.log(numberStore.getAll()); // [10]
+3. Вывод Типов (Type Inference):
+
+Как видно из примеров identity(123) и new DataStorage<number>(), TypeScript часто способен сам вывести (infer) тип T из переданных аргументов или контекста использования. Это делает код с дженериками менее многословным. Явное указание (<string>) нужно редко, в основном когда вывод неоднозначен или нужно переопределить вывод TS.
+
+4. Ограничения Дженериков (extends) – Говорим TS, что тип T умеет
+
+Часто нам нужно, чтобы тип T обладал какими-то минимальными свойствами или методами. Без этого мы не можем безопасно их использовать внутри дженерик-компонента. Для этого используются ограничения (constraints) с ключевым словом extends.
+
+TypeScript
+
+// Хотим функцию, которая работает с чем-угодно, у чего есть свойство 'length'
+// function logLength<T>(arg: T): void {
+//   console.log(arg.length); // ОШИБКА TS! Property 'length' does not exist on type 'T'.
+// }
+
+// Решение: Добавляем ограничение T extends { length: number }
+function logLength<T extends { length: number }>(arg: T): void {
+  // Теперь TS знает, что у 'arg' ТОЧНО есть свойство 'length' типа number
+  console.log(`Length is: ${arg.length}`);
+}
+
+logLength("abc");       // OK (string имеет length)
+logLength([1, 2, 3]);   // OK (array имеет length)
+logLength({ length: 10, name: "Obj with length" }); // OK
+// logLength(123);      // Ошибка! number не имеет length
+// logLength({});        // Ошибка! пустой объект не имеет length
+Критический взгляд: Ограничения — неотъемлемая часть практического использования дженериков. Они позволяют балансировать между универсальностью (T) и возможностью использовать специфичные для определенных структур операции (как .length). Без ограничений дженерики были бы гораздо менее полезны. Можно использовать extends с другими типами, интерфейсами, классами и даже другими дженерик-параметрами (<T extends U, U>).
+5. Частые Ошибки и Нюансы:
+
+T — это ТИП, а не ЗНАЧЕНИЕ: Нельзя написать let x = T; или return new T();. T существует только на уровне типов.
+Доступ к свойствам без ограничений: Как в примере logLength без extends — компилятор не знает, есть ли у произвольного типа T свойство .length, и справедливо ругается.
+Статические члены и Дженерики: Статические члены класса не могут использовать дженерик-параметр класса.
+TypeScript
+
+class MyGenericClass<T> {
+  value: T;
+  // static staticValue: T; // ОШИБКА! Static members cannot reference class type parameters.
+  static staticMethod() { /* OK */ }
+  constructor(val: T) { this.value = val; }
+}
+Почему? Статические члены принадлежат самому классу, а не экземпляру. Они существуют еще до того, как для какого-либо экземпляра будет указан конкретный тип T.
+6. Дженерики и Стирание Типов:
+
+Важно помнить: как и все типы TS, дженерики полностью стираются при компиляции в JS.
+
+TypeScript
+
+// TS
+function identity<T>(arg: T): T { return arg; }
+let result = identity<string>("test");
+JavaScript
+
+// JS Output
+"use strict";
+function identity(arg) { return arg; } // <T>, :T, :T - стерты!
+let result = identity("test"); // <string> - стерто!
+Вся польза дженериков — в статической проверке типов во время разработки и компиляции, а также в улучшенной работе автодополнения в IDE. Они не влияют на рантайм (обычно).
+
+Итог по Теме #6:
+
+Дженерики — краеугольный камень переиспользуемости и типобезопасности в TypeScript. Они позволяют писать гибкий код, работающий с разными типами, не прибегая к небезопасному any. Понимание того, как объявлять параметры типа, как использовать ограничения (extends) и как TS выводит типы — ключ к эффективному использованию этой мощной фичи.

@@ -1,0 +1,86 @@
+Тема #14 (Node.js/Express): Объекты Запроса (req) и Ответа (res) в Express
+
+Когда вы пишете обработчик маршрута или middleware в Express ((req, res, next) => { ... }), вы работаете с объектами req (запрос) и res (ответ). Важно понимать, что это не совсем те же самые объекты, что и в базовом модуле http Node.js. Express расширяет их, добавляя множество удобных свойств и методов.
+
+1. Объект Запроса (req – request)
+
+Представляет входящий HTTP-запрос. Express (и middleware) добавляют к нему полезные данные:
+
+req.params: Объект, содержащий параметры маршрута. Если ваш маршрут /users/:userId, то для запроса /users/123, req.params будет { userId: '123' }. (Значения всегда строки).
+req.query: Объект, содержащий параметры строки запроса (после ?). Для /search?q=node&limit=10, req.query будет { q: 'node', limit: '10' }. (Значения всегда строки).
+req.body: Объект, содержащий тело запроса. Критически Важно: Это свойство будет undefined, если вы не используете middleware для парсинга тела запроса! Обычно нужно подключить app.use(express.json()) для Content-Type: application/json или app.use(express.urlencoded({ extended: true })) для Content-Type: application/x-www-form-urlencoded до ваших маршрутов.
+req.headers: Объект с заголовками запроса (ключи в нижнем регистре). (Наследуется от Node).
+req.method: HTTP-метод запроса ('GET', 'POST' и т.д.). (Наследуется от Node).
+req.url: URL запроса, как он пришел (включая query string).
+req.originalUrl: Обычно то же, что и req.url.
+req.path: Часть URL без query string.
+req.get(headerName): Удобный метод для получения значения заголовка (нечувствителен к регистру).
+req.ip: IP-адрес клиента.
+Другие свойства: Middleware могут добавлять свои свойства (например, req.user после аутентификации, req.session для сессий).
+Пример использования req:
+
+JavaScript
+
+// Предполагаем, что app.use(express.json()) было вызвано ранее
+app.post('/users/:userId/settings', (req, res) => {
+  const userId = req.params.userId; // Из пути
+  const notify = req.query.notify === 'true'; // Из ?notify=true
+  const newSettings = req.body; // Из тела JSON запроса
+
+  console.log(`Обновляем настройки для пользователя ${userId}`);
+  console.log(`Уведомлять? ${notify}`);
+  console.log(`Новые настройки:`, newSettings);
+
+  // ... логика обновления ...
+
+  res.json({ success: true, userId, settings: newSettings });
+});
+2. Объект Ответа (res – response)
+
+Используется для формирования и отправки ответа клиенту. Express добавляет много удобных методов:
+
+Отправка Ответа (Завершение Цикла):
+res.send([body]): Универсальный метод. Отправляет ответ. Автоматически устанавливает Content-Type (например, text/html для строк, application/json для объектов/массивов). Если body — объект или массив, он автоматически преобразуется в JSON. Завершает ответ (res.end() вызывается неявно).
+res.json([body]): Специально для отправки JSON. Автоматически преобразует body в JSON и устанавливает Content-Type: application/json. Завершает ответ. Предпочтителен для API.
+res.status(statusCode): Устанавливает HTTP статус-код ответа (например, 200, 201, 400, 404, 500). Возвращает res, что позволяет строить цепочки: res.status(404).send('Not Found').
+res.sendStatus(statusCode): Устанавливает статус и отправляет текстовое представление статуса (например, "Not Found") как тело ответа. Завершает ответ.
+res.sendFile(path, [options], [callback]): Отправляет файл по указанному пути. Устанавливает Content-Type на основе расширения файла.
+res.render(viewName, [locals], [callback]): Рендерит HTML с помощью настроенного шаблонизатора (EJS, Pug и т.д.) и отправляет его.
+res.redirect([status], path): Перенаправляет клиента на другой URL.
+res.end([data]): Низкоуровневый метод Node.js для завершения ответа. Обычно вызывается неявно другими методами (send, json и т.д.).
+Установка Заголовков:
+res.set(field, [value]) или res.header(field, [value]): Устанавливает заголовок ответа. Можно передать объект заголовков: res.set({'Cache-Control': 'no-cache', 'X-Custom': 'value'}).
+res.type(mimeType): Удобный метод для установки заголовка Content-Type.
+Пример использования res:
+
+JavaScript
+
+app.get('/users/:id', (req, res, next) => {
+  const userId = req.params.id;
+  const user = findUserById(userId); // Функция поиска пользователя (может вернуть null)
+
+  if (!user) {
+    // Вариант 1: Отправить статус и JSON
+    // return res.status(404).json({ error: 'User not found' });
+
+    // Вариант 2: Отправить статус и текст
+    return res.status(404).send('User not found');
+
+    // Вариант 3 (менее предпочтителен):
+    // res.statusCode = 404;
+    // res.end('User not found');
+    // return;
+  }
+
+  // Пользователь найден, отправляем JSON
+  res.json(user); // Автоматически Content-Type: application/json и статус 200 (по умолчанию)
+});
+3. Критический Взгляд и Практика:
+
+Абстракция над http: req и res в Express — это огромное удобство по сравнению с голыми объектами http. Парсинг params, query, body (через middleware), методы send/json/status экономят массу кода.
+req.body и Middleware: Еще раз — помните, что req.body будет доступен только если вы подключили соответствующее middleware (express.json() или express.urlencoded()) до вашего обработчика маршрута!
+Завершение Ответа: Каждый успешный путь выполнения вашего обработчика должен завершаться одним из методов отправки ответа (send, json, end, sendFile, redirect, sendStatus). Попытка отправить второй ответ вызовет ошибку. Незавершенный ответ оставит запрос "висеть".
+Обработка Ошибок: Вспомним про middleware для ошибок ((err, req, res, next) => {}). Именно оно в конечном итоге использует res.status().json() (или send) для отправки ответа клиенту в случае ошибки, переданной через next(err).
+Итог по Теме #14:
+
+Объекты req и res в Express — это расширенные и удобные версии нативных объектов модуля http. Они предоставляют простой доступ к данным запроса (params, query, body (с middleware), headers) и удобные методы для формирования и отправки ответа (send, json, status, set). Понимание этих объектов и их методов — основа написания обработчиков маршрутов и middleware в Express.
