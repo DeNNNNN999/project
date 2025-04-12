@@ -9,9 +9,14 @@ export default defineConfig({
   },
   base: '/project/',
   build: {
+    chunkSizeWarningLimit: 2000,
     rollupOptions: {
       output: {
-        manualChunks: undefined
+        manualChunks(id) {
+          if (id.includes('node_modules')) {
+            return 'vendor';
+          }
+        }
       }
     }
   }
