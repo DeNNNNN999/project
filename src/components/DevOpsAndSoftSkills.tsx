@@ -17,7 +17,7 @@ interface Skill {
 }
 
 const skills: Skill[] = [
-  // DevOps Skills
+
   {
     name: 'Git',
     icon: 'logos:git',
