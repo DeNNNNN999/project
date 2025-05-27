@@ -22,3 +22,13 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+
+# Видео файлы проектов (загружай их отдельно)
+public/videos/*.mp4
+public/videos/*.mov
+public/videos/*.avi
+public/videos/*.webm
+# Но сохраняем превью изображения
+!public/videos/*.jpg
+!public/videos/*.png
+!public/videos/*.webp

@@ -1,4 +1,4 @@
-import React, { useState, useMemo, ReactNode, useEffect } from 'react'
+import React, { useState, useMemo, ReactNode, useEffect, useRef } from 'react'
 import { motion, AnimatePresence } from 'framer-motion'
 import { Icon } from '@iconify/react'
 import { useNavigate, Link } from 'react-router-dom'
@@ -33,9 +33,9 @@ const globalCategories: Category[] = [
   {
     id: 'programming',
     name: 'Programming',
-    icon: 'ph:code-bold',
+    icon: 'tabler:code',
     color: '#4361ee',
-    description: 'Языки и фреймворки',
+    description: 'Языки, библиотееки и фреймворки',
     items: [
       {
         id: 'javascript',
@@ -43,7 +43,7 @@ const globalCategories: Category[] = [
         icon: 'logos:javascript',
         iconBg: '#F7DF1E',
         textColor: '#121212',
-        description: 'Динамика веба и не только',
+        description: 'Динамика веба',
         path: '/research/javascript',
       },
       {
@@ -78,7 +78,7 @@ const globalCategories: Category[] = [
   {
     id: 'databases',
     name: 'Databases',
-    icon: 'ph:database-bold',
+    icon: 'iconoir:database-solid',
     color: '#8B5CF6',
     description: 'Хранение и управление данными',
     items: [
@@ -105,7 +105,7 @@ const globalCategories: Category[] = [
   {
     id: 'backend',
     name: 'Backend',
-    icon: 'ph:server-bold',
+    icon: 'mdi:code-json',
     color: '#0EA5E9',
     description: 'Серверная логика, API и работа с данными',
     items: [
@@ -120,7 +120,7 @@ const globalCategories: Category[] = [
       },
       {
         id: 'orm',
-        name: 'ORM (Обзор и Критика)',
+        name: 'ORM (Обзор)',
         icon: 'mdi:database-sync-outline',
         iconBg: '#ff7f50',
         textColor: '#ffffff',
@@ -132,9 +132,9 @@ const globalCategories: Category[] = [
   {
     id: 'devops',
     name: 'DevOps & Cloud',
-    icon: 'ph:cloud-arrow-up-bold',
+    icon: 'logos:kubernetes',
     color: '#10B981',
-    description: 'Инфраструктура, деплой и автоматизация',
+    description: 'Инфраструктура',
     items: [
       {
         id: 'docker',
@@ -150,20 +150,20 @@ const globalCategories: Category[] = [
   {
     id: 'motion-design',
     name: 'Motion-design/web-motion-design',
-    icon: 'ph:film-strip-bold',
+    icon: 'ph:film-slate-fill',
     color: '#EC4899',
-    description: 'Анимации, переходы и визуальные эффекты с компонентами',
+    description: 'Анимации',
     items: [
       {
         id: 'motion-design-combined',
         name: 'GSAP / After Effects',
-        icon: 'logos:greensock',
-        secondaryIcon: 'simple-icons:adobeaftereffects',
+        icon: 'logos:greensock-icon',
+        secondaryIcon: 'logos:adobe-after-effects',
         iconBg: '#88CE02',
         secondaryIconBg: '#1F1E3C',
         textColor: '#ffffff',
         secondaryTextColor: '#9999FF',
-        description: 'Профессиональные веб-анимации с GSAP и в стиле After Effects',
+        description: ' веб-анимации с GSAP и After Effects',
         path: '/research/web-motion-design',
       }
     ],
@@ -171,14 +171,14 @@ const globalCategories: Category[] = [
   {
     id: 'advanced-research',
     name: 'Advanced Custom Research New Features Games Tasks',
-    icon: 'ph:puzzle-piece-bold',
+    icon: 'logos:tensorflow',
     color: '#F59E0B',
     description: 'Расширенные исследования, задачи и пользовательские функции',
     items: [
       {
         id: 'uml-architectures',
         name: 'UML / Architectures',
-        icon: 'mdi:diagram',
+        icon: 'clarity:diagram-solid',
         iconBg: '#3B82F6',
         textColor: '#ffffff',
         description: 'Диаграммы UML и архитектурные решения',
@@ -187,7 +187,7 @@ const globalCategories: Category[] = [
       {
         id: 'tasks',
         name: 'Tasks',
-        icon: 'mdi:clipboard-check-outline',
+        icon: 'fluent-emoji-high-contrast:clipboard',
         iconBg: '#10B981',
         textColor: '#ffffff',
         description: 'Практические задачи и решения',
@@ -196,7 +196,7 @@ const globalCategories: Category[] = [
       {
         id: 'games',
         name: 'Games',
-        icon: 'mdi:gamepad-variant-outline', 
+        icon: 'solar:gamepad-minimalistic-bold',
         iconBg: '#8B5CF6',
         textColor: '#ffffff',
         description: 'Интерактивные игры и геймификация',
@@ -205,8 +205,8 @@ const globalCategories: Category[] = [
       {
         id: 'questions',
         name: 'Questions',
-        icon: 'mdi:help-circle-outline',
-        iconBg: '#EC4899', 
+        icon: 'tabler:help-octagon-filled',
+        iconBg: '#EC4899',
         textColor: '#ffffff',
         description: 'Вопросы и ответы по углубленным темам',
         path: '/research/custom/questions',
@@ -214,7 +214,7 @@ const globalCategories: Category[] = [
       {
         id: 'custom-advanced-research',
         name: 'Custom Advanced Research',
-        icon: 'mdi:flask-outline',
+        icon: 'fa6-solid:flask-vial',
         iconBg: '#F59E0B',
         textColor: '#ffffff',
         description: 'Специализированные исследования и эксперименты',
@@ -276,7 +276,7 @@ const TechnologyCard: React.FC<TechnologyCardProps> = ({ item }) => {
   const navigate = useNavigate()
   return (
     <motion.div
-      className="relative flex flex-col justify-between p-4 overflow-hidden transition-colors duration-300 border rounded-lg cursor-pointer bg-slate-800/40 border-slate-700/50 group hover:bg-slate-800/80"
+      className="relative flex flex-col justify-between p-5 overflow-hidden transition-colors duration-300 border rounded-lg cursor-pointer bg-slate-800/60 border-slate-700/50 group hover:bg-slate-800/90 hover:border-slate-600"
       variants={cardVariants}
       whileHover={{ y: -5, transition: { duration: 0.2 } }}
       whileTap={{ scale: 0.98 }}
@@ -293,39 +293,44 @@ const TechnologyCard: React.FC<TechnologyCardProps> = ({ item }) => {
           {' '}
           <div className="flex items-center gap-2 shrink-0">
             <motion.div
-              className="flex items-center justify-center w-10 h-10 rounded-md"
-              style={{ backgroundColor: item.iconBg || '#1E293B' }}
+              className="flex items-center justify-center w-12 h-12 rounded-md shadow-lg"
+              style={{ backgroundColor: item.iconBg || '#1E293B', boxShadow: `0 0 15px ${item.iconBg}50` || '0 0 15px rgba(30, 41, 59, 0.3)' }}
               transition={{ type: 'spring', stiffness: 400, damping: 15 }}
               whileHover={{ scale: 1.1 }}>
               {' '}
-              <Icon icon={item.icon} className="w-6 h-6" style={{ color: item.textColor || 'white' }} />{' '}
+              <Icon icon={item.icon} className="w-7 h-7" style={{ color: item.textColor || 'white' }} />{' '}
             </motion.div>
             {item.secondaryIcon && (
               <>
                 <div className="text-gray-500">/</div>
                 <motion.div
-                  className="flex items-center justify-center w-10 h-10 rounded-md"
-                  style={{ backgroundColor: item.secondaryIconBg || '#1E293B' }}
+                  className="flex items-center justify-center w-12 h-12 rounded-md shadow-lg"
+                  style={{ backgroundColor: item.secondaryIconBg || '#1E293B', boxShadow: `0 0 15px ${item.secondaryIconBg}50` || '0 0 15px rgba(30, 41, 59, 0.3)' }}
                   transition={{ type: 'spring', stiffness: 400, damping: 15 }}
                   whileHover={{ scale: 1.1 }}>
                   {' '}
-                  <Icon icon={item.secondaryIcon} className="w-6 h-6" style={{ color: item.secondaryTextColor || 'white' }} />{' '}
+                  <Icon icon={item.secondaryIcon} className="w-7 h-7" style={{ color: item.secondaryTextColor || 'white' }} />{' '}
                 </motion.div>
               </>
             )}
           </div>{' '}
-          <h3 className="text-lg font-medium text-white">{item.name}</h3>{' '}
+          <div>
+            <h3 className="text-xl font-medium text-white transition-colors duration-300 group-hover:text-blue-300">{item.name}</h3>
+          </div>{' '}
         </div>{' '}
         <p className="mb-3 text-sm text-gray-300 min-h-[40px]">{item.description}</p>{' '}
       </div>{' '}
-      <div className="flex items-center justify-between mt-1 text-xs text-gray-400 transition-colors duration-300 group-hover:text-sky-300">
-        {' '}
-        <span>Узнать больше</span>{' '}
+      <div className="flex items-center justify-end pt-3 mt-4 text-xs text-gray-400 transition-colors duration-300 border-t border-slate-700/30 group-hover:text-sky-300 group-hover:border-slate-700/80">
         <motion.div initial={{ x: 0 }} whileHover={{ x: 3, transition: { type: 'spring', stiffness: 300 } }}>
-          {' '}
-          <Icon icon="ph:arrow-right-bold" className="w-4 h-4" />{' '}
-        </motion.div>{' '}
+          <Icon icon="ph:arrow-right-bold" className="w-4 h-4" />
+        </motion.div>
       </div>{' '}
+      {/* Индикатор новизны для некоторых карточек */}
+      {(item.id === 'typescript' || item.id === 'react' || item.id === 'nextjs') && (
+        <div className="absolute top-2 right-2 px-1.5 py-0.5 text-[10px] font-medium bg-green-500/20 text-green-300 rounded-full">
+          NEW
+        </div>
+      )}{' '}
     </motion.div>
   )
 }
@@ -378,15 +383,15 @@ const MainCategory: React.FC<MainCategoryProps> = ({ category }) => {
 
 const ResearchCategoryTabs: React.FC = () => {
   const [activeTab, setActiveTab] = useState('uml-architectures');
-  
+
   const tabs = [
-    { id: 'uml-architectures', label: 'UML / Architectures', icon: 'mdi:diagram', color: '#3B82F6' },
-    { id: 'tasks', label: 'Tasks', icon: 'mdi:clipboard-check-outline', color: '#10B981' },
-    { id: 'games', label: 'Games', icon: 'mdi:gamepad-variant-outline', color: '#8B5CF6' },
-    { id: 'questions', label: 'Questions', icon: 'mdi:help-circle-outline', color: '#EC4899' },
-    { id: 'custom-advanced-research', label: 'Custom Advanced Research', icon: 'mdi:flask-outline', color: '#F59E0B' },
+    { id: 'uml-architectures', label: 'UML / Architectures', icon: 'clarity:diagram-solid', color: '#3B82F6' },
+    { id: 'tasks', label: 'Tasks', icon: 'fluent-emoji-high-contrast:clipboard', color: '#10B981' },
+    { id: 'games', label: 'Games', icon: 'solar:gamepad-minimalistic-bold', color: '#8B5CF6' },
+    { id: 'questions', label: 'Questions', icon: 'tabler:help-octagon-filled', color: '#EC4899' },
+    { id: 'custom-advanced-research', label: 'Custom Advanced Research', icon: 'fa6-solid:flask-vial', color: '#F59E0B' },
   ];
-  
+
   return (
     <div className="p-6 border rounded-lg border-amber-500/50 bg-slate-800/40">
       <div className="flex flex-wrap gap-2 mb-6 border-b border-slate-700">
@@ -401,62 +406,62 @@ const ResearchCategoryTabs: React.FC = () => {
           </button>
         ))}
       </div>
-      
-      <div className="p-4 bg-slate-800/30 rounded-lg">
+
+      <div className="p-4 rounded-lg bg-slate-800/30">
         {activeTab === 'uml-architectures' && (
           <div className="space-y-4">
             <h3 className="text-xl font-medium text-blue-300">UML и Архитектурные Решения</h3>
             <p className="text-gray-300">Диаграммы UML для визуализации архитектуры, паттернов проектирования и моделирования систем.</p>
             <div className="flex justify-end">
-              <Link to="/research/custom/uml-architectures" className="flex items-center gap-1 text-sm text-blue-400 hover:text-blue-300 transition-colors">
+              <Link to="/research/custom/uml-architectures" className="flex items-center gap-1 text-sm text-blue-400 transition-colors hover:text-blue-300">
                 Перейти к разделу <Icon icon="ph:arrow-right-bold" className="w-4 h-4" />
               </Link>
             </div>
           </div>
         )}
-        
+
         {activeTab === 'tasks' && (
           <div className="space-y-4">
             <h3 className="text-xl font-medium text-green-300">Практические Задачи</h3>
             <p className="text-gray-300">Коллекция практических задач по программированию, алгоритмам и разработке с подробными решениями.</p>
             <div className="flex justify-end">
-              <Link to="/research/custom/tasks" className="flex items-center gap-1 text-sm text-green-400 hover:text-green-300 transition-colors">
+              <Link to="/research/custom/tasks" className="flex items-center gap-1 text-sm text-green-400 transition-colors hover:text-green-300">
                 Перейти к разделу <Icon icon="ph:arrow-right-bold" className="w-4 h-4" />
               </Link>
             </div>
           </div>
         )}
-        
+
         {activeTab === 'games' && (
           <div className="space-y-4">
             <h3 className="text-xl font-medium text-purple-300">Игры и Геймификация</h3>
             <p className="text-gray-300">Интерактивные игры и геймифицированные упражнения для обучения программированию и технологиям.</p>
             <div className="flex justify-end">
-              <Link to="/research/custom/games" className="flex items-center gap-1 text-sm text-purple-400 hover:text-purple-300 transition-colors">
+              <Link to="/research/custom/games" className="flex items-center gap-1 text-sm text-purple-400 transition-colors hover:text-purple-300">
                 Перейти к разделу <Icon icon="ph:arrow-right-bold" className="w-4 h-4" />
               </Link>
             </div>
           </div>
         )}
-        
+
         {activeTab === 'questions' && (
           <div className="space-y-4">
             <h3 className="text-xl font-medium text-pink-300">Вопросы и Ответы</h3>
             <p className="text-gray-300">Углубленные вопросы и развернутые ответы по сложным темам в программировании и разработке.</p>
             <div className="flex justify-end">
-              <Link to="/research/custom/questions" className="flex items-center gap-1 text-sm text-pink-400 hover:text-pink-300 transition-colors">
+              <Link to="/research/custom/questions" className="flex items-center gap-1 text-sm text-pink-400 transition-colors hover:text-pink-300">
                 Перейти к разделу <Icon icon="ph:arrow-right-bold" className="w-4 h-4" />
               </Link>
             </div>
           </div>
         )}
-        
+
         {activeTab === 'custom-advanced-research' && (
           <div className="space-y-4">
             <h3 className="text-xl font-medium text-amber-300">Специализированные Исследования</h3>
             <p className="text-gray-300">Глубокие исследования, эксперименты и анализ передовых концепций в технологиях и программировании.</p>
             <div className="flex justify-end">
-              <Link to="/research/custom/advanced-research" className="flex items-center gap-1 text-sm text-amber-400 hover:text-amber-300 transition-colors">
+              <Link to="/research/custom/advanced-research" className="flex items-center gap-1 text-sm transition-colors text-amber-400 hover:text-amber-300">
                 Перейти к разделу <Icon icon="ph:arrow-right-bold" className="w-4 h-4" />
               </Link>
             </div>
@@ -495,6 +500,7 @@ const GlobalCategory: React.FC<GlobalCategoryProps> = ({ category, filteredItems
   }
   const itemsToDisplay = filteredItems || category.items
   const hasContent = category.id === 'advanced-research' || (itemsToDisplay && itemsToDisplay.length > 0)
+  const itemsCount = itemsToDisplay?.length || 0
   return (
     <motion.div
       className="mb-8"
@@ -503,10 +509,10 @@ const GlobalCategory: React.FC<GlobalCategoryProps> = ({ category, filteredItems
       transition={{ type: 'spring', damping: 20, stiffness: 100 }}>
       {' '}
       <motion.div
-        className="flex items-center justify-between gap-4 p-2 mb-4 -m-2 transition-colors rounded-md cursor-pointer hover:bg-slate-800/50"
+        className="flex items-center justify-between gap-4 p-3 mb-4 transition-colors border border-transparent rounded-md cursor-pointer hover:border-slate-700 hover:bg-slate-800/70"
         onClick={onToggle}
         title={isExpanded ? 'Свернуть' : 'Развернуть'}
-        whileHover={{ backgroundColor: 'rgba(30, 41, 59, 0.5)' }}>
+        whileHover={{ backgroundColor: 'rgba(30, 41, 59, 0.7)' }}>
         {' '}
         <div className="flex items-start gap-4">
           {' '}
@@ -523,10 +529,17 @@ const GlobalCategory: React.FC<GlobalCategoryProps> = ({ category, filteredItems
           </div>{' '}
         </div>{' '}
         {hasContent && (
-          <motion.div animate={{ rotate: isExpanded ? 0 : -90 }} transition={{ duration: 0.2 }} className="ml-2">
-            {' '}
-            <Icon icon="ph:caret-down-bold" className="w-5 h-5 text-gray-500" />{' '}
-          </motion.div>
+          <div className="flex items-center">
+            {itemsCount > 0 && (
+              <span className="px-2 py-0.5 mr-3 text-xs font-medium rounded-full bg-blue-500/20 text-blue-300">
+                {itemsCount} {itemsCount === 1 ? 'материал' : 'материалов'}
+              </span>
+            )}
+            <motion.div animate={{ rotate: isExpanded ? 0 : -90 }} transition={{ duration: 0.2 }}>
+              {' '}
+              <Icon icon="ph:caret-down-bold" className="w-5 h-5 text-gray-500" />{' '}
+            </motion.div>
+          </div>
         )}{' '}
       </motion.div>{' '}
       <AnimatePresence initial={false}>
@@ -556,12 +569,22 @@ const GlobalCategory: React.FC<GlobalCategoryProps> = ({ category, filteredItems
                   <p className="max-w-lg mx-auto text-sm text-gray-400"> {category.description} </p>{' '}
                 </div>
               ) : itemsToDisplay && itemsToDisplay.length > 0 ? (
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                  {' '}
-                  {itemsToDisplay.map(item => (
-                    <TechnologyCard key={item.id} item={item} />
-                  ))}{' '}
-                </div>
+                <>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                    {' '}
+                    {itemsToDisplay.map(item => (
+                      <TechnologyCard key={item.id} item={item} />
+                    ))}{' '}
+                  </div>
+                  {itemsCount > 3 && (
+                    <div className="flex justify-end mt-4">
+                      <button className="flex items-center gap-1 px-3 py-1.5 text-sm text-indigo-300 transition-colors bg-indigo-900/30 rounded-md hover:bg-indigo-900/50">
+                        Смотреть все {itemsCount} материалов в категории
+                        <Icon icon="ph:arrow-right-bold" className="w-3.5 h-3.5" />
+                      </button>
+                    </div>
+                  )}
+                </>
               ) : null}{' '}
             </motion.div>{' '}
           </motion.div>
@@ -655,48 +678,14 @@ const ResearchPage: React.FC = () => {
           <h1 className="mb-1 text-4xl font-bold text-transparent md:text-5xl bg-clip-text bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-400">
             {' '}
             Research Hub{' '}
+            <span className="ml-2 text-sm font-medium text-indigo-300 bg-indigo-900/30 px-2 py-0.5 rounded-full">2025</span>
           </h1>
           <p className="max-w-2xl mx-auto mt-2 text-lg text-gray-300/90 md:mx-0">
             {' '}
-            Критический анализ технологий, документация и задачи{' '}
+            Критический анализ технологий, документация и исследования с практическими задачами{' '}
           </p>
         </motion.div>
-        <motion.div
-          className="mb-16"
-          initial={{ opacity: 0, y: -15 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.3 }}>
-          <div className="relative max-w-xl mx-auto">
-            <input
-              type="text"
-              placeholder="Поиск по технологиям, концепциям..."
-              className="w-full px-4 py-3 pl-12 text-white placeholder-gray-500 transition-all duration-200 border rounded-lg shadow-sm bg-slate-800/60 border-slate-700/60 focus:border-indigo-500 focus:outline-none focus:ring-2 focus:ring-indigo-500/30 hover:border-slate-600"
-              value={searchTerm}
-              onChange={e => setSearchTerm(e.target.value)}
-            />
-            <Icon
-              icon="ph:magnifying-glass-bold"
-              className="absolute w-5 h-5 text-gray-500 left-4 top-3.5 pointer-events-none"
-            />
-            <AnimatePresence>
-              {' '}
-              {searchTerm && (
-                <motion.button
-                  key="clear-button"
-                  initial={{ opacity: 0, scale: 0.7 }}
-                  animate={{ opacity: 1, scale: 1 }}
-                  exit={{ opacity: 0, scale: 0.7 }}
-                  transition={{ duration: 0.15 }}
-                  onClick={() => setSearchTerm('')}
-                  className="absolute p-1 text-gray-500 rounded-full right-3 top-2.5 hover:text-white hover:bg-slate-700 focus:outline-none focus:ring-2 focus:ring-slate-600 transition-colors"
-                  aria-label="Очистить поиск">
-                  {' '}
-                  <Icon icon="ph:x-bold" className="w-4 h-4" />{' '}
-                </motion.button>
-              )}{' '}
-            </AnimatePresence>
-          </div>
-        </motion.div>
+
         <motion.div variants={pageContainerVariants} initial="hidden" animate="show">
           {filteredCategories.length > 0 ? (
             filteredCategories.map(category => (
