@@ -23,6 +23,17 @@ dist-ssr
 *.sln
 *.sw?
 
+# Environment files
+.env
+.env.local
+.env.production
+
+# Netlify
+.netlify
+
+# OS files
+Thumbs.db
+
 # Видео файлы проектов (загружай их отдельно)
 public/videos/*.mp4
 public/videos/*.mov

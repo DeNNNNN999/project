@@ -7,7 +7,7 @@ export default defineConfig({
   optimizeDeps: {
     exclude: ['lucide-react'],
   },
-  base: '/project/',
+  base: '/', // Для Netlify используем корневой путь
   build: {
     chunkSizeWarningLimit: 2000,
     rollupOptions: {
