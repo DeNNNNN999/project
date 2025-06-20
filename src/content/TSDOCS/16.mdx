@@ -2,20 +2,21 @@
 
 TypeScript предоставляет набор готовых "типов-утилит". Это предопределенные дженерик-типы, которые позволяют легко трансформировать существующие типы, создавая новые на их основе. Вам не нужно каждый раз вручную писать сложные Mapped или Conditional типы (которые мы обсуждали в Теме #12) для типовых операций — они уже встроены в язык.
 
-Зачем они нужны?
+## Зачем они нужны?
 
-DRY (Don't Repeat Yourself): Не нужно повторять одну и ту же логику трансформации типов.
-Читаемость: Использование стандартных имен (Partial, Readonly и т.д.) гораздо понятнее, чем сложная конструкция с keyof, in, infer.
-Надежность: Эти типы являются частью языка, они хорошо протестированы.
+- **DRY (Don't Repeat Yourself):** Не нужно повторять одну и ту же логику трансформации типов.
+- **Читаемость:** Использование стандартных имен (Partial, Readonly и т.д.) гораздо понятнее, чем сложная конструкция с keyof, in, infer.
+- **Надежность:** Эти типы являются частью языка, они хорошо протестированы.
+
 Давай рассмотрим самые важные из них с примерами и критическим взглядом:
 
-1. Partial<T> – Сделать все свойства необязательными
+## 1. Partial&lt;T&gt; – Сделать все свойства необязательными
 
-Что делает: Берет тип T и создает новый тип, где все свойства T становятся необязательными (добавляется ?).
-Концептуальная реализация: type Partial<T> = { [P in keyof T]?: T[P]; }
-Применение: Очень полезен для описания объектов, которые могут содержать только часть свойств основного типа (например, объект с настройками для обновления, данные формы до полной валидации).
-TypeScript
+- **Что делает:** Берет тип T и создает новый тип, где все свойства T становятся необязательными (добавляется ?).
+- **Концептуальная реализация:** `type Partial<T> = { [P in keyof T]?: T[P]; }`
+- **Применение:** Очень полезен для описания объектов, которые могут содержать только часть свойств основного типа (например, объект с настройками для обновления, данные формы до полной валидации).
 
+```typescript
 interface UserProfile {
   username: string;
   email: string;
@@ -33,14 +34,17 @@ function updateProfile(data: Partial<UserProfile>) {
 updateProfile({ username: "new_username" }); // OK
 updateProfile({ age: 31, bio: "Updated bio" }); // OK
 // updateProfile({ unknownField: true }); // Ошибка! Лишние свойства все еще проверяются (Тема #9)
-Критический взгляд: Супер-удобно, но делает все поля необязательными. Иногда нужно больше контроля (например, сделать необязательными только некоторые поля — для этого используют Pick/Omit в комбинации с Partial).
-2. Required<T> – Сделать все свойства обязательными
+```
 
-Что делает: Противоположность Partial. Берет тип T и делает все его свойства обязательными (удаляет ?).
-Концептуальная реализация: type Required<T> = { [P in keyof T]-?: T[P]; } (Знак -? убирает опциональность).
-Применение: Когда нужно гарантировать, что объект имеет все поля, даже если в исходном типе они были необязательными (например, после применения дефолтных значений).
-TypeScript
+**Критический взгляд:** Супер-удобно, но делает все поля необязательными. Иногда нужно больше контроля (например, сделать необязательными только некоторые поля — для этого используют Pick/Omit в комбинации с Partial).
 
+## 2. Required&lt;T&gt; – Сделать все свойства обязательными
+
+- **Что делает:** Противоположность Partial. Берет тип T и делает все его свойства обязательными (удаляет ?).
+- **Концептуальная реализация:** `type Required<T> = { [P in keyof T]-?: T[P]; }` (Знак -? убирает опциональность).
+- **Применение:** Когда нужно гарантировать, что объект имеет все поля, даже если в исходном типе они были необязательными (например, после применения дефолтных значений).
+
+```typescript
 interface AppConfig {
   port?: number;
   host?: string;
@@ -51,7 +55,7 @@ const initialConfig: AppConfig = { port: 8080 }; // host и strictMode - undefin
 
 function startApp(config: Required<AppConfig>) {
   // Здесь мы уверены, что все поля есть
-  console.log(`Starting on <span class="math-inline">\{config\.host\}\:</span>{config.port} strict=${config.strictMode}`);
+  console.log(`Starting on ${config.host}:${config.port} strict=${config.strictMode}`);
 }
 
 const fullConfig: Required<AppConfig> = {
@@ -62,26 +66,31 @@ const fullConfig: Required<AppConfig> = {
 
 startApp(fullConfig); // OK
 // startApp(initialConfig); // Ошибка! host и strictMode отсутствуют
-3. Readonly<T> – Сделать все свойства неизменяемыми (на уровне типов)
+```
 
-Что делает: Делает все свойства типа T доступными только для чтения (readonly).
-Концептуальная реализация: type Readonly<T> = { readonly [P in keyof T]: T[P]; }
-Применение: Для создания иммутабельных версий объектов (на этапе компиляции), предотвращения случайных мутаций пропсов, стейта и т.д.
-TypeScript
+## 3. Readonly&lt;T&gt; – Сделать все свойства неизменяемыми (на уровне типов)
 
+- **Что делает:** Делает все свойства типа T доступными только для чтения (readonly).
+- **Концептуальная реализация:** `type Readonly<T> = { readonly [P in keyof T]: T[P]; }`
+- **Применение:** Для создания иммутабельных версий объектов (на этапе компиляции), предотвращения случайных мутаций пропсов, стейта и т.д.
+
+```typescript
 interface Point { x: number; y: number; }
 const point: Readonly<Point> = { x: 10, y: 20 };
 
 // point.x = 15; // ОШИБКА TS! Cannot assign to 'x' because it is a read-only property.
 console.log(point.x); // OK
-Критический взгляд: Важно помнить — это compile-time защита. В рантайме объект JS все еще можно изменить (если только не использовать Object.freeze()). Но на уровне кода это сильно помогает избегать багов с мутациями.
-4. Record<Keys, Type> – Типизированный Словарь/Объект
+```
 
-Что делает: Создает тип объекта, где ключами являются типы из объединения Keys (обычно string | number | symbol или объединение строковых литералов), а значениями — тип Type.
-Концептуальная реализация: type Record<K extends keyof any, T> = { [P in K]: T; } (keyof any = string | number | symbol).
-Применение: Удобен для описания объектов, используемых как словари или хэш-мапы с известным набором ключей или общим типом ключей.
-TypeScript
+**Критический взгляд:** Важно помнить — это compile-time защита. В рантайме объект JS все еще можно изменить (если только не использовать Object.freeze()). Но на уровне кода это сильно помогает избегать багов с мутациями.
 
+## 4. Record&lt;Keys, Type&gt; – Типизированный Словарь/Объект
+
+- **Что делает:** Создает тип объекта, где ключами являются типы из объединения Keys (обычно string | number | symbol или объединение строковых литералов), а значениями — тип Type.
+- **Концептуальная реализация:** `type Record<K extends keyof any, T> = { [P in K]: T; }` (keyof any = string | number | symbol).
+- **Применение:** Удобен для описания объектов, используемых как словари или хэш-мапы с известным набором ключей или общим типом ключей.
+
+```typescript
 type AllowedColors = "red" | "green" | "blue";
 type ColorInfo = { hex: string; isDark: boolean };
 
@@ -98,39 +107,50 @@ const featureFlags: Record<string, boolean> = {
   "new-dashboard": true,
   "beta-feature": false
 };
-Критический взгляд: Гораздо безопаснее, чем просто {[key: string]: SomeType}, так как позволяет ограничить набор допустимых ключей.
-5. Pick<T, Keys> – Выбрать Нужные Свойства
+```
 
-Что делает: Создает новый тип, выбирая из T только те свойства, ключи которых перечислены в Keys (объединение литеральных строк/символов, являющихся ключами T).
-Концептуальная реализация: type Pick<T, K extends keyof T> = { [P in K]: T[P]; }
-Применение: Создание более "легких" типов из больших интерфейсов, например, для превью данных.
-TypeScript
+**Критический взгляд:** Гораздо безопаснее, чем просто `{[key: string]: SomeType}`, так как позволяет ограничить набор допустимых ключей.
 
+## 5. Pick&lt;T, Keys&gt; – Выбрать Нужные Свойства
+
+- **Что делает:** Создает новый тип, выбирая из T только те свойства, ключи которых перечислены в Keys (объединение литеральных строк/символов, являющихся ключами T).
+- **Концептуальная реализация:** `type Pick<T, K extends keyof T> = { [P in K]: T[P]; }`
+- **Применение:** Создание более "легких" типов из больших интерфейсов, например, для превью данных.
+
+```typescript
 interface DetailedUser { id: number; name: string; email: string; address: string; isActive: boolean; }
+
 // Выбираем только id и name
 type UserSummary = Pick<DetailedUser, "id" | "name">;
 // UserSummary = { id: number; name: string; }
+
 const summary: UserSummary = { id: 1, name: "Summary User" };
-6. Omit<T, Keys> – Исключить Ненужные Свойства
+```
 
-Что делает: Создает новый тип, беря все свойства из T, кроме тех, ключи которых перечислены в Keys. Противоположность Pick.
-Концептуальная реализация: Использует Pick и Exclude: type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;
-Применение: Удобно, когда проще перечислить то, что нужно убрать, чем то, что нужно оставить. Например, для типов данных формы (убираем id, createdAt).
-TypeScript
+## 6. Omit&lt;T, Keys&gt; – Исключить Ненужные Свойства
 
+- **Что делает:** Создает новый тип, беря все свойства из T, кроме тех, ключи которых перечислены в Keys. Противоположность Pick.
+- **Концептуальная реализация:** Использует Pick и Exclude: `type Omit<T, K extends keyof any> = Pick<T, Exclude<keyof T, K>>;`
+- **Применение:** Удобно, когда проще перечислить то, что нужно убрать, чем то, что нужно оставить. Например, для типов данных формы (убираем id, createdAt).
+
+```typescript
 // Используем DetailedUser из примера Pick
 // Убираем address и isActive
 type UserEditableInfo = Omit<DetailedUser, "address" | "isActive">;
 // UserEditableInfo = { id: number; name: string; email: string; }
+
 const editable: UserEditableInfo = { id: 3, name: "Can Edit", email: "edit@example.com" };
-7. Exclude<T, U> и Extract<T, U> – Работа с Объединениями
+```
 
-Exclude<T, U>: Из объединения T исключает все типы, совместимые с U.
-Extract<T, U>: Из объединения T извлекает только те типы, которые совместимы с U.
-Концептуальная реализация: Через Conditional Types (T extends U ? never : T для Exclude, T extends U ? T : never для Extract).
-Пример:
-TypeScript
+## 7. Exclude&lt;T, U&gt; и Extract&lt;T, U&gt; – Работа с Объединениями
 
+- **Exclude&lt;T, U&gt;:** Из объединения T исключает все типы, совместимые с U.
+- **Extract&lt;T, U&gt;:** Из объединения T извлекает только те типы, которые совместимы с U.
+- **Концептуальная реализация:** Через Conditional Types (`T extends U ? never : T` для Exclude, `T extends U ? T : never` для Extract).
+
+**Пример:**
+
+```typescript
 type AllStatus = "pending" | "loading" | "success" | "error" | null | undefined;
 
 // Исключаем null и undefined
@@ -138,24 +158,28 @@ type ConcreteStatus = Exclude<AllStatus, null | undefined>; // "pending" | "load
 
 // Извлекаем только статусы успеха или ошибки
 type FinalStatus = Extract<AllStatus, "success" | "error">; // "success" | "error"
-8. NonNullable<T> – Убрать null и undefined
+```
 
-Что делает: Упрощенный Exclude для самого частого случая: Exclude<T, null | undefined>.
-Применение: Гарантировать, что значение точно не null и не undefined (например, после проверки).
-TypeScript
+## 8. NonNullable&lt;T&gt; – Убрать null и undefined
 
+- **Что делает:** Упрощенный Exclude для самого частого случая: `Exclude<T, null | undefined>`.
+- **Применение:** Гарантировать, что значение точно не null и не undefined (например, после проверки).
+
+```typescript
 function processName(name: string | null | undefined) {
   const definiteName: NonNullable<typeof name> = name ?? "Default"; // Используем ?? для присвоения
   console.log(definiteName.toUpperCase()); // OK, definiteName точно string
 }
-9. ReturnType<T> и Parameters<T> – Интроспекция Функций
+```
 
-ReturnType<T>: Получает тип возвращаемого значения функции T.
-Parameters<T>: Получает типы параметров функции T в виде кортежа (tuple).
-Концептуальная реализация: Через Conditional Types с infer.
-Применение: Полезны для создания типов на основе существующих функций, не дублируя определения типов.
-TypeScript
+## 9. ReturnType&lt;T&gt; и Parameters&lt;T&gt; – Интроспекция Функций
 
+- **ReturnType&lt;T&gt;:** Получает тип возвращаемого значения функции T.
+- **Parameters&lt;T&gt;:** Получает типы параметров функции T в виде кортежа (tuple).
+- **Концептуальная реализация:** Через Conditional Types с infer.
+- **Применение:** Полезны для создания типов на основе существующих функций, не дублируя определения типов.
+
+```typescript
 function complexCalculation(x: number, y: string): { result: number; log: string[] } {
   // ...
   return { result: x * 2, log: [y] };
@@ -168,8 +192,10 @@ let res: CalculationResult = { result: 10, log: ["done"] };
 // Получаем типы параметров
 type CalculationParams = Parameters<typeof complexCalculation>; // [x: number, y: string]
 let params: CalculationParams = [5, "input"];
-Другие полезные (но реже используемые): ConstructorParameters<T>, InstanceType<T>, Uppercase<T>, Lowercase<T>, Capitalize<T>, Uncapitalize<T>.
+```
 
-Итог по Теме #16:
+**Другие полезные (но реже используемые):** ConstructorParameters&lt;T&gt;, InstanceType&lt;T&gt;, Uppercase&lt;T&gt;, Lowercase&lt;T&gt;, Capitalize&lt;T&gt;, Uncapitalize&lt;T&gt;.
+
+## Итог по Теме #16:
 
 Утилитарные типы — это фундаментальный инструментарий TypeScript для работы с типами. Они инкапсулируют сложные Mapped и Conditional типы, предоставляя простой и читаемый интерфейс для типовых трансформаций. Их нужно знать и активно использовать. Они делают код типов более кратким, понятным и поддерживаемым. Почти любой нетривиальный код на TypeScript будет их использовать.
