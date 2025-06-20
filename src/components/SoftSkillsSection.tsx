@@ -4,6 +4,7 @@ import gsap from 'gsap'
 import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Icon } from '@iconify/react'
 
+
 if (typeof window !== 'undefined') {
   gsap.registerPlugin(ScrollTrigger)
 }
@@ -378,39 +379,7 @@ const SoftSkillsSection = () => {
   }, [])
 
   return (
-    <section ref={sectionRef} className="relative py-20 overflow-hidden bg-[#0B1120]">
-      {/* Анимированный фон */}
-      <div className="absolute inset-0 soft-skills-bg">
-        <div className="absolute inset-0 bg-gradient-to-b from-purple-900/20 via-transparent to-blue-900/20" />
-        
-        {/* Анимированные сферы */}
-        <motion.div
-          className="absolute top-20 left-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, 100, 0],
-            y: [0, -50, 0],
-            scale: [1, 1.2, 1],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-        <motion.div
-          className="absolute bottom-20 right-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, -100, 0],
-            y: [0, 50, 0],
-            scale: [1, 1.3, 1],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </div>
+    <section ref={sectionRef} className="relative py-20 overflow-hidden">
 
       {/* Контент */}
       <div className="relative z-10 px-4 mx-auto max-w-7xl">
@@ -428,7 +397,7 @@ const SoftSkillsSection = () => {
           </motion.div>
           
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="text-transparent bg-gradient-to-r from-purple-400 via-pink-400 to-blue-400 bg-clip-text">
+            <span className="text-transparent bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text">
               Мои софт скиллы
             </span>
           </h2>

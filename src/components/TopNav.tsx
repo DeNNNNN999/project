@@ -1,135 +1,148 @@
 import React, { useState, useEffect, useRef, useCallback, useMemo, memo } from 'react';
-import { motion, useMotionValue, useSpring, useTransform } from 'motion/react';
+import { motion, useMotionValue, useSpring, AnimatePresence } from 'motion/react';
 import { Icon } from '@iconify/react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import gsap from 'gsap';
-import FPSStats from 'react-fps-stats';
+import SimpleFPSCounter from './SimpleFPSCounter';
 import { useDebouncedCallback } from 'use-debounce';
 import * as THREE from 'three';
 
-// Оптимизированный 3D логотип с мемоизацией
-const FluidLogo = memo(() => {
-  const [isHovered, setIsHovered] = useState(false);
+
+const LiquidMetalLogo = memo(() => {
   const containerRef = useRef<HTMLDivElement>(null);
   const canvasRef = useRef<HTMLCanvasElement>(null);
   const sceneRef = useRef<any>(null);
   const frameRef = useRef(0);
+  const mouseRef = useRef({ x: 0, y: 0 });
   const navigate = useNavigate();
+  const [isHovered, setIsHovered] = useState(false);
 
-  // Мемоизированные шейдеры для оптимизации
   const shaders = useMemo(() => ({
     vertex: `
       uniform float uTime;
       uniform vec2 uMouse;
       uniform float uHover;
-      
+      uniform float uClick;
+
       varying vec2 vUv;
+      varying vec3 vPosition;
       varying vec3 vNormal;
+      varying float vDistortion;
 
       void main() {
         vUv = uv;
-        vNormal = normal;
+        vNormal = normalize(normalMatrix * normal);
+        vPosition = position;
+
         vec3 pos = position;
-        
-        // Упрощенная анимация для лучшей производительности
-        float wave = sin(uTime * 2.0 + position.x * 3.0) * 0.1;
-        pos += normal * wave * uHover;
-        
+
+        float distortion = sin(uTime * 2.0 + position.x * 5.0) * cos(uTime * 1.5 + position.y * 5.0) * 0.15;
+        vec2 mouseEffect = (uMouse - 0.5) * 2.0;
+        distortion += length(mouseEffect) * 0.1 * uHover;
+        float breathing = sin(uTime * 1.5) * 0.05;
+
+        pos += normal * (distortion + breathing) * (0.8 + uHover * 0.5);
+        pos *= 1.0 + uClick * 0.1 * sin(uTime * 20.0);
+
+        vDistortion = distortion;
+
         gl_Position = projectionMatrix * modelViewMatrix * vec4(pos, 1.0);
       }
     `,
     fragment: `
       uniform float uTime;
       uniform float uHover;
-      
+      uniform vec2 uMouse;
+
       varying vec2 vUv;
+      varying vec3 vPosition;
       varying vec3 vNormal;
+      varying float vDistortion;
 
       void main() {
-        // Упрощенное освещение
-        vec3 lightDir = normalize(vec3(0.5, 0.5, 1.0));
-        float diffuse = max(dot(vNormal, lightDir), 0.0);
-        
-        // Простой градиент
-        vec3 color1 = vec3(0.2, 0.5, 1.0); // Синий
-        vec3 color2 = vec3(0.5, 0.2, 1.0); // Фиолетовый
-        
-        vec3 finalColor = mix(color1, color2, vUv.y + sin(uTime * 0.5) * 0.2);
-        finalColor *= (0.8 + diffuse * 0.4);
-        
-        // Эффект при наведении
-        finalColor += vec3(0.2) * uHover;
-        
-        gl_FragColor = vec4(finalColor, 0.95);
+        vec3 color1 = vec3(0.7, 0.7, 0.9);
+        vec3 color2 = vec3(0.2, 0.3, 0.6);
+        vec3 color3 = vec3(0.9, 0.9, 1.0);
+
+        vec3 lightPos = vec3(5.0, 5.0, 5.0);
+        vec3 lightDir = normalize(lightPos - vPosition);
+        float diff = max(dot(vNormal, lightDir), 0.0);
+
+        vec3 viewDir = normalize(cameraPosition - vPosition);
+        float fresnel = pow(1.0 - dot(viewDir, vNormal), 2.0);
+
+        vec3 reflectDir = reflect(-lightDir, vNormal);
+        float spec = pow(max(dot(viewDir, reflectDir), 0.0), 32.0);
+
+        float gradientShift = sin(uTime * 0.5 + vUv.y * 3.0) * 0.3;
+        vec3 baseColor = mix(color2, color1, vUv.y + gradientShift);
+
+        baseColor = mix(baseColor, color3, fresnel * 0.6);
+        baseColor += spec * color3 * 1.5;
+
+        float rainbow = sin(vPosition.x * 10.0 + uTime) * 0.1;
+        baseColor.r += rainbow * 0.2;
+        baseColor.b -= rainbow * 0.1;
+
+        baseColor *= 1.0 + uHover * 0.3;
+        baseColor += vec3(abs(vDistortion) * 2.0) * uHover;
+
+        gl_FragColor = vec4(baseColor, 0.95);
       }
     `
   }), []);
 
-  // Оптимизированная инициализация Three.js
   useEffect(() => {
     if (!containerRef.current || !canvasRef.current) return;
 
-    const width = 64;
-    const height = 64;
+    const width = 40;
+    const height = 40;
 
-    // Инициализация сцены
     const scene = new THREE.Scene();
-    const camera = new THREE.PerspectiveCamera(50, width / height, 0.1, 100);
-    camera.position.z = 5;
+    const camera = new THREE.PerspectiveCamera(50, 1, 0.1, 100);
+    camera.position.z = 4;
 
     const renderer = new THREE.WebGLRenderer({
       canvas: canvasRef.current,
-      antialias: false, // Отключаем для производительности
+      antialias: true,
       alpha: true,
       powerPreference: 'high-performance'
     });
     renderer.setSize(width, height);
-    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2)); // Ограничиваем pixel ratio
+    renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
 
-    // Создаем материал
     const material = new THREE.ShaderMaterial({
       uniforms: {
         uTime: { value: 0 },
         uMouse: { value: new THREE.Vector2(0.5, 0.5) },
-        uHover: { value: 0 }
+        uHover: { value: 0 },
+        uClick: { value: 0 }
       },
       vertexShader: shaders.vertex,
       fragmentShader: shaders.fragment,
       transparent: true
     });
 
-    // Уменьшаем количество полигонов для лучшей производительности
-    const geometry = new THREE.SphereGeometry(1.8, 32, 32); // Было 64x64
+    const geometry = new THREE.SphereGeometry(1.5, 32, 32);
     const mesh = new THREE.Mesh(geometry, material);
     scene.add(mesh);
 
-    // Сохраняем ссылки
     sceneRef.current = { scene, camera, renderer, mesh, material };
 
-    // Оптимизированная анимация - 30 FPS вместо 60
-    let lastTime = 0;
-    const targetFPS = 30;
-    const frameDelay = 1000 / targetFPS;
-
-    const animate = (currentTime: number) => {
+    const animate = (time: number) => {
       frameRef.current = requestAnimationFrame(animate);
 
-      // Ограничиваем FPS
-      if (currentTime - lastTime < frameDelay) return;
-      lastTime = currentTime;
-
       const { material, mesh, renderer, scene, camera } = sceneRef.current;
-      
-      material.uniforms.uTime.value = currentTime * 0.001;
-      mesh.rotation.y += 0.003;
-      mesh.rotation.x += 0.001;
-      
+
+      material.uniforms.uTime.value = time * 0.001;
+      mesh.rotation.y += 0.005;
+      mesh.rotation.x = Math.sin(time * 0.0005) * 0.1;
+
       renderer.render(scene, camera);
     };
 
     frameRef.current = requestAnimationFrame(animate);
 
-    // Очистка
     return () => {
       cancelAnimationFrame(frameRef.current);
       geometry.dispose();
@@ -138,7 +151,23 @@ const FluidLogo = memo(() => {
     };
   }, [shaders]);
 
-  // Оптимизированные обработчики событий
+  const handleClick = useCallback(() => {
+    if (sceneRef.current) {
+      gsap.to(sceneRef.current.material.uniforms.uClick, {
+        value: 1,
+        duration: 0.1,
+        onComplete: () => {
+          gsap.to(sceneRef.current.material.uniforms.uClick, {
+            value: 0,
+            duration: 0.6,
+            ease: "elastic.out(1, 0.3)"
+          });
+        }
+      });
+    }
+    navigate('/');
+  }, [navigate]);
+
   const handleMouseEnter = useCallback(() => {
     setIsHovered(true);
     if (sceneRef.current) {
@@ -161,42 +190,20 @@ const FluidLogo = memo(() => {
     }
   }, []);
 
-  const handleClick = useCallback(() => {
-    if (sceneRef.current) {
-      const { mesh } = sceneRef.current;
-      gsap.to(mesh.scale, {
-        x: 0.9,
-        y: 0.9,
-        z: 0.9,
-        duration: 0.1,
-        onComplete: () => {
-          gsap.to(mesh.scale, {
-            x: 1,
-            y: 1,
-            z: 1,
-            duration: 0.4,
-            ease: "back.out(1.7)"
-          });
-        }
-      });
-    }
-    navigate('/');
-  }, [navigate]);
-
   return (
     <div
       ref={containerRef}
-      className="relative flex items-center justify-center w-16 h-16 cursor-pointer"
+      className="relative flex items-center justify-center w-10 h-10 cursor-pointer"
+      onClick={handleClick}
       onMouseEnter={handleMouseEnter}
       onMouseLeave={handleMouseLeave}
-      onClick={handleClick}
     >
       <canvas
         ref={canvasRef}
         className="absolute inset-0 w-full h-full"
       />
-      
-      {/* Упрощенный эффект свечения */}
+
+      {/* Свечение */}
       <motion.div
         className="absolute inset-0 rounded-full blur-xl pointer-events-none"
         animate={{
@@ -212,47 +219,9 @@ const FluidLogo = memo(() => {
   );
 });
 
-FluidLogo.displayName = 'FluidLogo';
+LiquidMetalLogo.displayName = 'LiquidMetalLogo';
 
-// Мемоизированный NavItem для оптимизации
-const NavItem = memo(({ item, isActive, onClick }: any) => {
-  const handleClick = useCallback((e: React.MouseEvent) => {
-    onClick(item, e);
-  }, [item, onClick]);
-
-  return (
-    <motion.button
-      onClick={handleClick}
-      className="relative px-4 py-2 rounded-full group"
-      initial={{ opacity: 0, y: -20 }}
-      animate={{ opacity: 1, y: 0 }}
-      whileHover={{ scale: 1.05 }}
-      whileTap={{ scale: 0.95 }}
-    >
-      <motion.div
-        className={`absolute inset-0 rounded-full transition-colors duration-300
-          ${isActive ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20' : 'opacity-0 group-hover:opacity-100 bg-slate-700/30'}`}
-        layoutId={`nav-bg-${item.name}`}
-      />
-
-      {isActive && (
-        <motion.div
-          className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 via-indigo-500 to-purple-600"
-          layoutId="activeIndicator"
-        />
-      )}
-
-      <span className={`relative z-10 flex items-center gap-2 ${isActive ? 'text-white font-medium' : 'text-gray-300 group-hover:text-white transition-colors'}`}>
-        <Icon icon={item.icon} className="w-5 h-5" />
-        <span>{item.name}</span>
-      </span>
-    </motion.button>
-  );
-});
-
-NavItem.displayName = 'NavItem';
-
-// Главный компонент навигации с оптимизациями
+// Классический навбар
 const TopNav = () => {
   const navItems = useMemo(() => [
     { name: 'Home', icon: 'ph:house-fill', path: '/#home' },
@@ -268,7 +237,7 @@ const TopNav = () => {
   const [scrollProgress, setScrollProgress] = useState(0);
   const [isScrolled, setIsScrolled] = useState(false);
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const [showFPS, setShowFPS] = useState(false);
+  const [showFPS, setShowFPS] = useState(true);
 
   // Дебаунс для оптимизации скролла
   const handleScroll = useDebouncedCallback(() => {
@@ -277,19 +246,13 @@ const TopNav = () => {
 
     setScrollProgress(totalScroll > 0 ? (currentScroll / totalScroll) : 0);
     setIsScrolled(currentScroll > 50);
-  }, 16); // ~60fps
+  }, 16);
 
   useEffect(() => {
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
   }, [handleScroll]);
 
-  // Показываем FPS только в dev режиме
-  useEffect(() => {
-    setShowFPS(process.env.NODE_ENV === 'development');
-  }, []);
-
-  // Оптимизированный обработчик клика
   const handleNavClick = useCallback((item: any, event: React.MouseEvent) => {
     event.preventDefault();
 
@@ -317,136 +280,183 @@ const TopNav = () => {
     setIsMobileMenuOpen(false);
   }, [location.pathname, navigate]);
 
-  // Мемоизированная проверка активности
   const isActive = useCallback((item: any) => {
     if (item.path.startsWith('/#')) {
-      return location.pathname === '/' && location.hash === item.path.replace('/', '');
+      const sectionId = item.path.replace('/#', '');
+      return location.pathname === '/' && location.hash === `#${sectionId}`;
     }
     return location.pathname === item.path;
   }, [location.pathname, location.hash]);
 
   return (
     <>
-      {/* FPS монитор */}
-      {showFPS && (
-        <FPSStats 
-          top="auto" 
-          bottom={10} 
-          right={10} 
-          left="auto"
-          graphHeight={50}
-          graphWidth={70}
-        />
-      )}
+      {showFPS && <SimpleFPSCounter />}
 
       <motion.nav
         initial={{ y: -100 }}
         animate={{ y: 0 }}
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
-        className={`fixed top-0 left-0 right-0 z-50 border-b transition-all duration-300 ${
+        className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-xl transition-all duration-300 ${
           isScrolled
-            ? 'border-slate-800/80 backdrop-blur-lg bg-slate-900/80'
-            : 'border-slate-800/30 backdrop-blur-md bg-slate-900/50'
+            ? 'bg-gradient-to-r from-slate-900/95 via-slate-900/90 to-slate-900/95 shadow-lg shadow-purple-500/10 border-b border-white/10'
+            : 'bg-gradient-to-r from-slate-900/70 via-slate-900/60 to-slate-900/70'
         }`}
       >
-        {/* Упрощенный фон */}
-        <div className="absolute inset-0 bg-gradient-to-r from-slate-900/80 via-blue-900/20 to-slate-900/80" />
+        {/* Градиентная линия сверху */}
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-pink-500/50 to-transparent" />
 
         <div className="relative px-4 mx-auto max-w-7xl">
-          <div className="flex items-center justify-between h-20">
-            {/* Логотип */}
+          <div className="flex items-center justify-between h-16">
+            {/* Логотип и название */}
             <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               transition={{ delay: 0.2 }}
-              className="flex-shrink-0"
+              className="flex items-center space-x-3"
             >
-              <FluidLogo />
+              <LiquidMetalLogo />
+              <motion.div
+                initial={{ opacity: 0, x: -10 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="hidden sm:block"
+              >
+                <h1 className="text-xl font-bold text-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text animate-gradient-text">
+                  DeNNNNN999
+                </h1>
+                <p className="text-xs text-gray-400"></p>
+              </motion.div>
             </motion.div>
 
-            {/* Навигация */}
+            {/* Десктоп навигация */}
             <motion.div
               className="hidden md:block"
               initial={{ opacity: 0, y: -10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.3 }}
             >
-              <div className="flex space-x-1 p-1.5 rounded-full bg-slate-800/50 backdrop-blur-sm border border-slate-700/50">
-                {navItems.map((item) => (
-                  <NavItem
+              <nav className="flex items-center space-x-1">
+                {navItems.map((item, index) => (
+                  <motion.button
                     key={item.name}
-                    item={item}
-                    isActive={isActive(item)}
-                    onClick={handleNavClick}
-                  />
+                    onClick={(e) => handleNavClick(item, e)}
+                    className={`relative px-4 py-2 rounded-lg font-medium transition-all group ${
+                      isActive(item)
+                        ? 'text-white'
+                        : 'text-gray-400 hover:text-white'
+                    }`}
+                    initial={{ opacity: 0, y: -20 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    transition={{ delay: 0.1 + index * 0.05 }}
+                    whileHover={{ scale: 1.05 }}
+                    whileTap={{ scale: 0.95 }}
+                  >
+                    {/* Фоновая подсветка */}
+                    {isActive(item) && (
+                      <motion.div
+                        layoutId="activeNavBg"
+                        className="absolute inset-0 bg-gradient-to-r from-pink-600/20 via-purple-600/20 to-blue-600/20 rounded-lg"
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    )}
+
+                    {/* Hover эффект */}
+                    <div className="absolute inset-0 bg-white/5 rounded-lg opacity-0 group-hover:opacity-100 transition-opacity" />
+
+                    <span className="relative z-10 flex items-center gap-2">
+                      <Icon icon={item.icon} className="w-5 h-5" />
+                      <span>{item.name}</span>
+                    </span>
+
+                    {/* Активный индикатор снизу */}
+                    {isActive(item) && (
+                      <motion.div
+                        layoutId="activeIndicator"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"
+                        transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                      />
+                    )}
+                  </motion.button>
                 ))}
-              </div>
+              </nav>
             </motion.div>
 
-            {/* Кнопки справа */}
+            {/* Правая часть */}
             <div className="flex items-center space-x-3">
+              {/* FPS Toggle */}
               <motion.button
-                className="p-2 text-gray-300 transition-colors rounded-full bg-slate-800/80 hover:text-white"
-                whileHover={{ scale: 1.1 }}
-                whileTap={{ scale: 0.9 }}
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.4 }}
+                className="p-2 text-gray-400 hover:text-white transition-colors rounded-lg hover:bg-white/5"
                 onClick={() => setShowFPS(!showFPS)}
                 title="Toggle FPS"
+                whileHover={{ scale: 1.1 }}
+                whileTap={{ scale: 0.9 }}
               >
                 <Icon icon="ph:activity-bold" className="w-5 h-5" />
               </motion.button>
 
-              <div className="md:hidden">
-                <motion.button
-                  className="p-2 text-gray-300 transition-colors rounded-full bg-slate-800/80 hover:text-white"
-                  whileTap={{ scale: 0.9 }}
-                  onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                >
-                  <Icon
-                    icon={isMobileMenuOpen ? "ph:x-bold" : "ph:list-bold"}
-                    className="w-5 h-5"
-                  />
-                </motion.button>
-              </div>
+              {/* Мобильное меню */}
+              <motion.button
+                initial={{ opacity: 0, scale: 0.8 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: 0.5 }}
+                className="p-2 text-gray-300 transition-colors rounded-lg md:hidden hover:text-white hover:bg-white/5"
+                onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
+                whileTap={{ scale: 0.9 }}
+              >
+                <Icon
+                  icon={isMobileMenuOpen ? "ph:x-bold" : "ph:list-bold"}
+                  className="w-6 h-6"
+                />
+              </motion.button>
             </div>
           </div>
         </div>
 
-        {/* Мобильное меню */}
-        {isMobileMenuOpen && (
-          <motion.div
-            initial={{ height: 0, opacity: 0 }}
-            animate={{ height: 'auto', opacity: 1 }}
-            exit={{ height: 0, opacity: 0 }}
-            className="overflow-hidden md:hidden"
-          >
-            <div className="px-4 py-3 space-y-1 bg-slate-800/90 backdrop-blur-lg">
-              {navItems.map((item) => (
-                <motion.button
-                  key={item.name}
-                  onClick={(e) => handleNavClick(item, e)}
-                  className={`w-full text-left py-3 px-4 rounded-lg flex items-center space-x-3 ${
-                    isActive(item)
-                      ? 'bg-gradient-to-r from-blue-900/50 to-purple-900/50 text-white'
-                      : 'text-gray-300 hover:bg-slate-700/50'
-                  }`}
-                  whileTap={{ scale: 0.98 }}
-                >
-                  <Icon icon={item.icon} className="w-5 h-5" />
-                  <span>{item.name}</span>
-                </motion.button>
-              ))}
-            </div>
-          </motion.div>
-        )}
-
-        {/* Линия прогресса */}
+        {/* Прогресс бар */}
         <motion.div
-          className="absolute bottom-0 left-0 h-[2px] bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500"
+          className="absolute bottom-0 left-0 h-[2px]"
           style={{
             width: `${scrollProgress * 100}%`,
-            boxShadow: "0 0 10px rgba(139, 92, 246, 0.5)"
+            background: 'linear-gradient(90deg, #EC4899 0%, #8B5CF6 50%, #3B82F6 100%)',
+            boxShadow: "0 0 15px rgba(236, 72, 153, 0.6), 0 0 30px rgba(139, 92, 246, 0.4)"
           }}
         />
+
+        {/* Мобильное меню */}
+        <AnimatePresence>
+          {isMobileMenuOpen && (
+            <motion.div
+              initial={{ opacity: 0, height: 0 }}
+              animate={{ opacity: 1, height: 'auto' }}
+              exit={{ opacity: 0, height: 0 }}
+              className="md:hidden bg-slate-900/95 backdrop-blur-lg border-t border-slate-800"
+            >
+              <div className="px-4 py-3 space-y-1">
+                {navItems.map((item, index) => (
+                  <motion.button
+                    key={item.name}
+                    onClick={(e) => handleNavClick(item, e)}
+                    className={`w-full text-left py-3 px-4 rounded-lg flex items-center space-x-3 transition-all ${
+                      isActive(item)
+                        ? 'bg-gradient-to-r from-blue-600/20 to-purple-600/20 text-white'
+                        : 'text-gray-400 hover:bg-white/5 hover:text-white'
+                    }`}
+                    initial={{ opacity: 0, x: -20 }}
+                    animate={{ opacity: 1, x: 0 }}
+                    transition={{ delay: index * 0.05 }}
+                    whileTap={{ scale: 0.98 }}
+                  >
+                    <Icon icon={item.icon} className="w-5 h-5" />
+                    <span>{item.name}</span>
+                  </motion.button>
+                ))}
+              </div>
+            </motion.div>
+          )}
+        </AnimatePresence>
       </motion.nav>
     </>
   );

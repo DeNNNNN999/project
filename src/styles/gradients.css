@@ -1,0 +1,103 @@
+/* Добавь эти стили в конец файла */
+
+/* Глобальные переменные для градиентов */
+:root {
+  --gradient-pink-purple: linear-gradient(135deg, #EC4899 0%, #8B5CF6 100%);
+  --gradient-purple-blue: linear-gradient(135deg, #8B5CF6 0%, #3B82F6 100%);
+  --gradient-pink-black: linear-gradient(135deg, #EC4899 0%, #000000 100%);
+  --gradient-mesh: radial-gradient(at 20% 80%, #EC489940 0%, transparent 50%),
+                   radial-gradient(at 80% 20%, #8B5CF640 0%, transparent 50%),
+                   radial-gradient(at 40% 40%, #3B82F620 0%, transparent 50%);
+}
+
+/* Оптимизация производительности для градиентов */
+.gradient-background {
+  will-change: background-position;
+  transform: translateZ(0);
+  backface-visibility: hidden;
+}
+
+/* Плавные переходы между секциями */
+section {
+  position: relative;
+  isolation: isolate;
+}
+
+section::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(to bottom, transparent 0%, rgba(0,0,0,0.1) 50%, transparent 100%);
+  pointer-events: none;
+  z-index: 1;
+}
+
+/* Анимированные тени для карточек */
+@keyframes shadow-pulse {
+  0%, 100% {
+    box-shadow: 0 10px 40px -10px rgba(236, 72, 153, 0.3);
+  }
+  50% {
+    box-shadow: 0 20px 60px -15px rgba(139, 92, 246, 0.4);
+  }
+}
+
+.card-glow {
+  animation: shadow-pulse 4s ease-in-out infinite;
+}
+
+/* Стили для скролла */
+::-webkit-scrollbar {
+  width: 12px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(0, 0, 0, 0.3);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(to bottom, #EC4899, #8B5CF6);
+  border-radius: 6px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background: linear-gradient(to bottom, #EC4899, #3B82F6);
+}
+
+/* Улучшенные hover эффекты */
+.hover-glow {
+  transition: all 0.3s ease;
+  position: relative;
+  overflow: hidden;
+}
+
+.hover-glow::before {
+  content: '';
+  position: absolute;
+  inset: -2px;
+  background: var(--gradient-pink-purple);
+  border-radius: inherit;
+  opacity: 0;
+  transition: opacity 0.3s ease;
+  z-index: -1;
+  filter: blur(10px);
+}
+
+.hover-glow:hover::before {
+  opacity: 0.5;
+}
+
+/* Анимация для текста */
+@keyframes gradient-text {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animated-gradient-text {
+  background-size: 200% 200%;
+  animation: gradient-text 3s ease infinite;
+}

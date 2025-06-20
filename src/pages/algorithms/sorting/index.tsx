@@ -4,7 +4,55 @@ import { motion } from 'motion/react';
 import { Icon } from '@iconify/react';
 
 // Импорт данных алгоритмов из общего файла данных
-import { algorithmCategories, getAlgorithmsByCategory, AlgorithmCard } from '../../../data/algorithms-data';
+import { algorithmCategories, getAlgorithmsByCategory, Algorithm } from '../../../data/algorithms-data';
+
+// Компонент карточки алгоритма
+const AlgorithmCard = ({ algorithm, index }: { algorithm: Algorithm; index: number }) => {
+  return (
+    <motion.div
+      initial={{ opacity: 0, y: 20 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.4, delay: index * 0.1 }}
+      whileHover={{ y: -5 }}
+    >
+      <Link to={algorithm.path}>
+        <div className="h-full p-6 transition-all duration-300 border rounded-lg bg-slate-800/70 border-slate-700/50 hover:border-blue-500/50 hover:shadow-lg hover:shadow-blue-500/10">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="p-3 rounded-lg bg-gradient-to-br from-blue-600/20 to-purple-600/20">
+              <Icon icon={algorithm.icon || 'mdi:code-braces'} className="w-6 h-6 text-blue-400" />
+            </div>
+            <h3 className="text-lg font-semibold text-white">{algorithm.name}</h3>
+          </div>
+          
+          <p className="mb-4 text-sm text-slate-300">{algorithm.description}</p>
+          
+          <div className="flex items-center gap-4 text-xs">
+            <div className="flex items-center gap-1">
+              <Icon icon="mdi:clock-outline" className="w-4 h-4 text-green-400" />
+              <span className="text-slate-400">Время:</span>
+              <span className="font-mono text-white">{algorithm.complexity.time}</span>
+            </div>
+            <div className="flex items-center gap-1">
+              <Icon icon="mdi:memory" className="w-4 h-4 text-purple-400" />
+              <span className="text-slate-400">Память:</span>
+              <span className="font-mono text-white">{algorithm.complexity.space}</span>
+            </div>
+          </div>
+          
+          {algorithm.tags && algorithm.tags.length > 0 && (
+            <div className="flex flex-wrap gap-2 mt-3">
+              {algorithm.tags.map((tag, i) => (
+                <span key={i} className="px-2 py-1 text-xs text-blue-300 rounded-full bg-blue-900/30">
+                  {tag}
+                </span>
+              ))}
+            </div>
+          )}
+        </div>
+      </Link>
+    </motion.div>
+  );
+};
 
 const SortingAlgorithmsPage = () => {
   // Получаем только алгоритмы сортировки

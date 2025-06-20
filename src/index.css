@@ -1,3 +1,6 @@
+/* Импорт кастомных градиентов */
+@import './styles/gradients.css';
+
 /* Защита от копирования контента */
 body {
   -webkit-user-select: none;
@@ -420,4 +423,66 @@ button:focus:not(:active)::after {
 .backface-hidden {
   -webkit-backface-visibility: hidden;
   backface-visibility: hidden;
+}
+
+/* Стили для слайдеров */
+input[type="range"] {
+  -webkit-appearance: none;
+  appearance: none;
+  background: transparent;
+  cursor: pointer;
+}
+
+input[type="range"]::-webkit-slider-track {
+  background: #475569;
+  height: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+input[type="range"]::-moz-range-track {
+  background: #475569;
+  height: 0.5rem;
+  border-radius: 0.5rem;
+}
+
+input[type="range"]::-webkit-slider-thumb {
+  -webkit-appearance: none;
+  appearance: none;
+  background: #3b82f6;
+  height: 1.5rem;
+  width: 1.5rem;
+  border-radius: 50%;
+  margin-top: -0.5rem;
+  transition: all 0.2s ease;
+}
+
+input[type="range"]::-moz-range-thumb {
+  background: #3b82f6;
+  height: 1.5rem;
+  width: 1.5rem;
+  border-radius: 50%;
+  border: none;
+  transition: all 0.2s ease;
+}
+
+input[type="range"]:hover::-webkit-slider-thumb {
+  background: #2563eb;
+  transform: scale(1.1);
+}
+
+input[type="range"]:hover::-moz-range-thumb {
+  background: #2563eb;
+  transform: scale(1.1);
+}
+
+input[type="range"]:focus {
+  outline: none;
+}
+
+input[type="range"]:focus::-webkit-slider-thumb {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
+}
+
+input[type="range"]:focus::-moz-range-thumb {
+  box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.4);
 }

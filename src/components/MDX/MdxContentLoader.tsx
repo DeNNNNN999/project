@@ -1,14 +1,13 @@
-import React, { useState, useEffect } from 'react';
-import { MDXProvider } from '@mdx-js/react';
+import React, { useState, useEffect, lazy, Suspense } from 'react';
 import ReactMarkdown from 'react-markdown';
+import { MDXProvider } from '@mdx-js/react';
 
-// Типы для MDX контента
 interface MdxContentLoaderProps {
   lessonNumber: number | string;
-  docFolder?: string; // Добавляем опциональный параметр для указания папки
+  docFolder?: string;
 }
 
-// Компоненты для Markdown
+// MDX компоненты для стилизации
 const mdxComponents = {
   h1: (props: any) => <h1 className="text-2xl font-bold text-indigo-400 mb-4" {...props} />,
   h2: (props: any) => <h2 className="text-xl font-bold text-violet-400 mt-6 mb-3" {...props} />,
@@ -31,34 +30,65 @@ const MdxContentLoader: React.FC<MdxContentLoaderProps> = ({ lessonNumber, docFo
   const [content, setContent] = useState<string>('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [MdxComponent, setMdxComponent] = useState<React.ComponentType | null>(null);
 
   useEffect(() => {
-    const fetchMdxContent = async () => {
+    const loadMdxContent = async () => {
       try {
         setIsLoading(true);
-        
-        // Добавляем base path для GitHub Pages
-        const basePath = import.meta.env.MODE === 'production' ? '/project' : '';
-        const response = await fetch(`${basePath}/${docFolder}/${lessonNumber}.mdx`);
-        
-        if (!response.ok) {
-          throw new Error(`Ошибка загрузки урока ${lessonNumber}: ${response.status}`);
-        }
-        
-        const text = await response.text();
-        setContent(text);
         setError(null);
         
-        console.log(`Успешно загружен файл ${basePath}/${docFolder}/${lessonNumber}.mdx`);
-      } catch (err) {
+        // Динамический импорт MDX файла из src/content
+        const mdxPath = `/src/content/${docFolder}/${lessonNumber}.mdx`;
+        
+        try {
+          // Используем import.meta.glob для динамического импорта
+          const modules = import.meta.glob('/src/content/**/*.mdx');
+          const module = modules[mdxPath];
+          
+          if (!module) {
+            throw new Error(`Файл не найден: ${mdxPath}`);
+          }
+          
+          const imported = await module() as any;
+          
+          // MDX файлы экспортируют компонент по умолчанию
+          if (imported.default) {
+            setMdxComponent(() => imported.default);
+          } else {
+            // Если это просто текст, используем ReactMarkdown
+            const response = await fetch(mdxPath);
+            const text = await response.text();
+            setContent(text);
+          }
+          
+        } catch (importError) {
+          // Fallback: попробуем загрузить как обычный текстовый файл
+          console.warn('MDX import failed, trying as text:', importError);
+          
+          // Для продакшена: попробуем загрузить из public если файл там остался
+          try {
+            const response = await fetch(`/${docFolder}/${lessonNumber}.mdx`);
+            if (response.ok) {
+              const text = await response.text();
+              setContent(text);
+            } else {
+              throw new Error(`Файл не найден ни в src/content, ни в public`);
+            }
+          } catch (fetchError) {
+            throw new Error(`Не удалось загрузить файл ${lessonNumber}.mdx из папки ${docFolder}`);
+          }
+        }
+        
+      } catch (err: any) {
         console.error('Failed to load MDX content:', err);
-        setError(`Не удалось загрузить урок из "${docFolder}/${lessonNumber}.mdx". Пожалуйста, проверьте правильность пути и наличие файла.`);
+        setError(err.message || 'Неизвестная ошибка при загрузке контента');
       } finally {
         setIsLoading(false);
       }
     };
 
-    fetchMdxContent();
+    loadMdxContent();
   }, [lessonNumber, docFolder]);
 
   if (isLoading) {
@@ -72,17 +102,29 @@ const MdxContentLoader: React.FC<MdxContentLoaderProps> = ({ lessonNumber, docFo
   if (error) {
     return (
       <div className="text-red-400 p-4 border border-red-500/30 rounded bg-red-500/10">
+        <p className="font-semibold mb-2">Ошибка загрузки контента</p>
         <p>{error}</p>
-        <p className="mt-2 text-sm">Проверьте следующее:</p>
-        <ul className="list-disc pl-6 mt-1 text-sm">
-          <li>Существует ли директория "{docFolder}" в папке public?</li>
-          <li>Существует ли файл "{lessonNumber}.mdx" в этой директории?</li>
-          <li>Правильно ли указано имя директории (с учетом регистра)?</li>
-        </ul>
+        <p className="mt-4 text-sm text-gray-400">
+          Путь: /src/content/{docFolder}/{lessonNumber}.mdx
+        </p>
       </div>
     );
   }
 
+  // Если загружен MDX компонент
+  if (MdxComponent) {
+    return (
+      <MDXProvider components={mdxComponents}>
+        <div className="prose prose-invert max-w-none">
+          <Suspense fallback={<div>Загрузка контента...</div>}>
+            <MdxComponent />
+          </Suspense>
+        </div>
+      </MDXProvider>
+    );
+  }
+
+  // Если загружен обычный текст (fallback)
   return (
     <div className="prose prose-invert max-w-none">
       <ReactMarkdown components={mdxComponents}>{content}</ReactMarkdown>

@@ -5,7 +5,6 @@ import { Link } from 'react-router-dom';
 import {
   algorithmCategories,
   algorithms,
-  AlgorithmCard,
   getAlgorithmsByCategory,
   getAlgorithmById,
   getRelatedAlgorithms
@@ -15,7 +14,6 @@ import {
 export {
   algorithmCategories,
   algorithms,
-  AlgorithmCard,
   getAlgorithmsByCategory,
   getAlgorithmById,
   getRelatedAlgorithms

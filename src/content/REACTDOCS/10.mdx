@@ -1,0 +1,116 @@
+Тема #10 (React): Ссылки (useRef)
+
+`useRef` возвращает изменяемый (mutable) объект-ссылку (ref object), у которого есть одно свойство: `.current`. Значение, которое вы передаете в `useRef(initialValue)`, используется как начальное значение для `ref.current`.
+
+Ключевая Особенность: НЕ Вызывает Ре-рендер!
+
+Это фундаментальное отличие `useRef` от `useState`. Изменение свойства `ref.current` НЕ вызывает повторный рендер вашего компонента. React не отслеживает изменения `.current`. Сам объект ref сохраняется между рендерами компонента (как и state).
+
+Два Основных Сценария Использования:
+
+1. Доступ к DOM-узлам (Imperative DOM Access):
+
+Зачем? Иногда необходимо взаимодействовать с DOM напрямую, минуя декларативный подход React (например, для управления фокусом, измерения размеров элемента, интеграции со сторонними DOM-библиотеками). `useRef` предоставляет контролируемый способ получить ссылку на реальный DOM-узел.
+Как работает:
+Создаем реф: `const myInputRef = useRef<HTMLInputElement>(null);` (Важно инициализировать `null` для DOM-рефов и указать тип элемента в TS).
+Привязываем реф к JSX-элементу: `<input ref={myInputRef} type="text" />`.
+После того как React отрисует этот input в реальный DOM, он поместит ссылку на соответствующий DOM-узел в `myInputRef.current`.
+Вы можете получить доступ к DOM-узлу через `myInputRef.current` (например, в обработчиках событий или `useEffect`).
+Пример (Фокус на инпуте):
+
+```typescript
+import React, { useRef, useEffect } from 'react';
+
+function FocusInput() {
+  // 1. Создаем ref, типизируем его для input элемента
+  const inputElementRef = useRef<HTMLInputElement>(null);
+
+  // 3. Доступ к DOM-узлу (безопасно делать это в useEffect после монтирования)
+  useEffect(() => {
+    // Сработает один раз после первого рендера
+    // .current может быть null, если элемент еще не отрисован (теоретически)
+    inputElementRef.current?.focus(); // Ставим фокус на input при монтировании
+  }, []); // Пустой массив - выполнить один раз
+
+  const handleButtonClick = () => {
+     // Или доступ в обработчике события
+     inputElementRef.current?.select(); // Выделить текст в input
+  };
+
+  return (
+    <>
+      {/* 2. Привязываем ref к input */}
+      <input ref={inputElementRef} type="text" defaultValue="Hello" />
+      <button onClick={handleButtonClick}>Select Text</button>
+    </>
+  );
+}
+```
+
+Критический взгляд: Использование ref для доступа к DOM — это "лазейка" (escape hatch) из декларативного мира React в императивный мир DOM. Используйте его, когда декларативные подходы (через state и props) не подходят или излишне сложны. Это лучше, чем `document.getElementById` внутри компонента, так как React управляет жизненным циклом рефа. Важно: `.current` будет `null` во время первого рендера (до монтирования в DOM), поэтому доступ к нему часто происходит в `useEffect` или обработчиках.
+2. Хранение Изменяемых Значений без Ре-рендера ("Переменные Экземпляра")
+
+Зачем? Иногда нужно хранить значение, которое должно сохраняться между рендерами, но изменение которого не должно само по себе вызывать ре-рендер. Это похоже на поля экземпляра (`this.someValue`) в классовых компонентах.
+Примеры:
+ID таймеров (`setTimeout`, `setInterval`) для их последующей очистки.
+Предыдущее значение пропса или стейта.
+Любые другие изменяемые значения, не влияющие напрямую на JSX.
+Пример (ID таймера):
+
+```typescript
+import React, { useState, useEffect, useRef } from 'react';
+
+function Stopwatch() {
+  const [time, setTime] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  // Используем ref для хранения ID интервала
+  const intervalRef = useRef<NodeJS.Timeout | null>(null);
+
+  useEffect(() => {
+    if (isRunning) {
+      // Запускаем интервал и сохраняем ID в ref.current
+      intervalRef.current = setInterval(() => {
+        setTime(prevTime => prevTime + 1);
+      }, 1000);
+    } else if (intervalRef.current) {
+      // Если не запущен и есть ID в ref, очищаем интервал
+      clearInterval(intervalRef.current);
+      intervalRef.current = null;
+    }
+
+    // Функция очистки при размонтировании ИЛИ перед следующим запуском эффекта
+    return () => {
+      if (intervalRef.current) {
+        clearInterval(intervalRef.current);
+      }
+    };
+  }, [isRunning]); // Эффект зависит только от isRunning
+
+  return (
+    <div>
+      <p>Time: {time}</p>
+      <button onClick={() => setIsRunning(!isRunning)}>
+        {isRunning ? 'Stop' : 'Start'}
+      </button>
+      <button onClick={() => { setIsRunning(false); setTime(0); }}>
+        Reset
+      </button>
+    </div>
+  );
+}
+```
+
+Критический взгляд: Это очень удобный способ хранить "служебные" изменяемые данные, не засоряя state и не вызывая лишних ре-рендеров. Главная ловушка: не пытайтесь использовать ref для хранения данных, от которых зависит ваш JSX — изменения в `ref.current` не обновят UI. Для данных, влияющих на рендер, всегда используйте `useState` или `useReducer`.
+useRef vs useState – Ключевое Различие:
+
+| Хук | Изменение .current / Вызов setState | Вызывает ре-рендер? | Назначение |
+|-----|-------------------------------------|---------------------|------------|
+| `useRef` | `ref.current = newValue` | ❌ Нет | Доступ к DOM, хранение mutable-значений |
+| `useState` | `setState(newValue)` | ✅ Да | Хранение данных, влияющих на рендер |
+
+`React.forwardRef` – Проброс Рефов Внутрь Компонентов
+
+Если вы создаете свой компонент-обертку (например, `<MyInput>`), и хотите, чтобы родитель мог получить ref на внутренний DOM-элемент (`<input>`), вам нужно обернуть ваш компонент в `React.forwardRef`.
+Итог по Теме #10:
+
+`useRef` — это хук для создания изменяемых ссылок, которые сохраняются между рендерами, но не вызывают их при изменении свойства `.current`. Он служит двум основным целям: для императивного доступа к DOM-узлам (как "escape hatch") и для хранения любых изменяемых значений, не влияющих на рендер (как "переменные экземпляра"). Важно четко понимать его отличие от `useState` и использовать для правильных задач.

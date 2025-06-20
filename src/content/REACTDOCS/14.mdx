@@ -1,0 +1,182 @@
+Тема #14 (React): Паттерны React + TypeScript
+
+Использование TypeScript с React — это не просто добавление : string или : number. Это использование всей мощи системы типов TS для создания более надежных, понятных и легко поддерживаемых компонентов и приложений. Давай рассмотрим ключевые паттерны и нюансы.
+
+1. Типизация Компонентов (FC)
+
+Пропсы (props): Используем interface или type для описания ожидаемых пропсов.
+
+```typescript
+import React from 'react'; // Импорт React для JSX и типов
+
+interface ButtonProps {
+  onClick: (event: React.MouseEvent<HTMLButtonElement>) => void; // Типизация обработчика
+  label: string;
+  primary?: boolean; // Необязательный проп
+  style?: React.CSSProperties; // Встроенный тип для style
+  readonly icon?: React.ReactNode; // Readonly и тип для JSX-детей
+}
+
+// Способ 1: Обычная функция с типизированным параметром props
+// (Часто предпочтительнее сейчас - более явный)
+function Button({ label, onClick, primary = false, style, icon }: ButtonProps): JSX.Element {
+  const className = `button ${primary ? 'button-primary' : ''}`;
+  return <button className={className} style={style} onClick={onClick}>{icon} {label}</button>;
+}
+
+// Способ 2: Использование React.FC (FunctionComponent)
+// Неявно добавляет 'children' в пропсы, есть некоторые нюансы с defaultProps и дженериками в прошлом.
+const ButtonFC: React.FC<ButtonProps> = ({ label, onClick, primary = false, style, icon, children }) => {
+   const className = `button ${primary ? 'button-primary' : ''}`;
+   return <button className={className} style={style} onClick={onClick}>{icon} {label} {children}</button>;
+};
+```
+
+Критический взгляд на `React.FC`: Исторически был стандартом, но сейчас многие команды предпочитают явное описание функции (`(props: Props) => JSX.Element`), так как это чуть более явно (особенно с children) и решает некоторые редкие проблемы с дженериками и defaultProps. Но оба подхода валидны, главное — консистентность в проекте.
+2. Типизация Хуков
+
+`useState<T>`:
+TS часто может вывести тип из начального значения: `useState(0)` -> `number`.
+Явно указываем тип (`<T>`), когда начальное значение null, undefined, или когда тип — это объединение или сложный объект/массив, который TS не может точно вывести.
+
+```typescript
+const [user, setUser] = useState<User | null>(null); // Явно указываем, что может быть User или null
+const [ids, setIds] = useState<number[]>([]); // Явно указываем массив чисел
+```
+
+`useReducer<R, I>`: Типизация редьюсера, начального состояния и особенно действий (actions) через дискриминирующие объединения (см. Тему #5 про State) — это супер-сила TS для предсказуемого state management.
+`useRef<T>`:
+Для DOM-элементов: Указываем тип элемента и инициализируем null. Не забываем про ?. при доступе к .current, так как он будет null до монтирования.
+
+```typescript
+const inputRef = useRef<HTMLInputElement>(null);
+useEffect(() => { inputRef.current?.focus(); }, []);
+```
+
+Для изменяемых значений: Указываем тип хранимого значения.
+
+```typescript
+const timerIdRef = useRef<NodeJS.Timeout | null>(null);
+```
+`useContext<T>`:
+Типизируем значение, передаваемое в `createContext<T | null>(null)`.
+При использовании useContext делаем проверку на null (или создаем кастомный хук-обертку).
+
+```typescript
+const ThemeCtx = createContext<'light' | 'dark' | null>(null);
+function useTheme() {
+  const theme = useContext(ThemeCtx);
+  if (theme === null) throw new Error("useTheme must be used within ThemeProvider");
+  return theme;
+}
+```
+3. Типизация Событий (Events)
+
+React использует SyntheticEvent, обертку над нативным событием браузера. Для правильной типизации event и event.target нужно использовать специфичные типы событий из @types/react.
+Примеры:
+
+```typescript
+// Обработчик изменения input
+const handleChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  // event.target теперь точно HTMLInputElement
+  console.log(event.target.value);
+};
+
+// Обработчик клика по кнопке
+const handleClick = (event: React.MouseEvent<HTMLButtonElement>) => {
+  // event.currentTarget - это кнопка, на которой висит обработчик
+  console.log(event.currentTarget.textContent);
+};
+
+// Обработчик отправки формы
+const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
+  event.preventDefault();
+  console.log("Form submitted");
+};
+```
+
+Критический взгляд на event.target: Тип event.target может быть более общим (EventTarget), чем элемент, на который вы повесили обработчик (event.currentTarget), если клик произошел на вложенном элементе. Иногда может потребоваться явная проверка или утверждение типа (as), но безопаснее работать с event.currentTarget, если это возможно.
+4. Типизация children
+
+`React.ReactNode`: Самый универсальный тип для children. Принимает почти всё, что может рендерить React (JSX, строки, числа, массивы, null, undefined, boolean).
+`React.ReactElement`: Более строгий тип, принимает только JSX-элементы (`<... />`).
+`React.PropsWithChildren<P>`: Утилитарный тип, который добавляет `children?: React.ReactNode` к вашему типу пропсов P. Удобный шорткат.
+
+```typescript
+import React, { PropsWithChildren } from 'react';
+
+type CardProps = { title: string; };
+
+// Используем PropsWithChildren
+const Card: React.FC<PropsWithChildren<CardProps>> = ({ title, children }) => {
+  return (
+    <div className="card">
+      <h2>{title}</h2>
+      <div>{children}</div>
+    </div>
+  );
+};
+```
+
+5. Использование Утилитарных Типов (Utility Types)
+
+Мы их разбирали (Тема #16) — они очень полезны для пропсов:
+
+`Partial<Props>`: Для компонента, который принимает только часть пропсов для обновления.
+`Required<Props>`: Когда нужно передать все пропсы, даже если они были необязательны в базовом типе.
+`Readonly<Props>`: Для гарантии неизменяемости пропсов на уровне типов.
+`Pick<Props, 'key1' | 'key2'>`: Выбрать только нужные пропсы для дочернего компонента.
+`Omit<Props, 'keyToExclude'>`: Передать все пропсы, кроме некоторых.
+6. Дженерик Компоненты
+
+Позволяют создавать компоненты, работающие с разными типами данных, сохраняя типобезопасность.
+
+Пример (Список):
+
+```typescript
+import React from 'react';
+
+// Определяем пропсы для дженерик-компонента List
+interface ListProps<T> { // <T> - параметр типа для элемента списка
+  items: T[];
+  renderItem: (item: T, index: number) => React.ReactNode; // Функция для рендеринга одного элемента
+  getKey?: (item: T) => string | number; // Опциональная функция для получения ключа
+}
+
+// Объявляем дженерик-компонент
+function List<T>({ items, renderItem, getKey }: ListProps<T>) {
+  const keyExtractor = getKey || ((item, index) => index); // Дефолтный ключ - индекс (осторожно!)
+
+  return (
+    <ul>
+      {items.map((item, index) => (
+        <React.Fragment key={keyExtractor(item)}>
+          {/* Оборачиваем в Fragment с ключом, т.к. renderItem возвращает ReactNode */}
+          {renderItem(item, index)}
+        </React.Fragment>
+      ))}
+    </ul>
+  );
+}
+
+// --- Использование ---
+interface Product { id: number; name: string; }
+const products: Product[] = [{ id: 1, name: 'Apple' }, { id: 2, name: 'Banana' }];
+
+function App() {
+  return (
+    <List<Product> // Явно указываем тип T = Product
+      items={products}
+      getKey={(product) => product.id} // Используем ID как ключ
+      renderItem={(product) => ( // TS знает, что product здесь - это Product
+        <li>{product.name}</li>
+      )}
+    />
+  );
+}
+```
+
+Критический взгляд: Дженерик-компоненты очень мощны для создания переиспользуемых UI-элементов (списки, таблицы, селекты), но могут усложнить типизацию. Используйте их там, где структура компонента действительно не зависит от конкретного типа данных.
+Итог по Теме #14:
+
+TypeScript значительно повышает надежность и удобство разработки на React. Ключевые моменты: типизация пропсов (через interface/type), состояния и других хуков (с использованием дженериков `<T>`), правильная типизация событий, использование утилитарных типов для манипуляции пропсами и создание дженерик-компонентов для переиспользуемости. Это позволяет ловить множество ошибок на этапе компиляции, улучшает автодополнение и рефакторинг.

@@ -8,11 +8,9 @@ const HomePage = () => {
   return (
     <>
       <HeroSection />
-      <div className="bg-slate-900/50 backdrop-blur-lg">
-        <ProjectsSection />
-        <SkillsSection />
-        <SoftSkillsSection />
-      </div>
+      <ProjectsSection />
+      <SkillsSection />
+      <SoftSkillsSection />
       <ContactSection />
     </>
   );

@@ -2,6 +2,7 @@ import { useRef, useState } from 'react'
 import { motion, useMotionValue, useTransform, useSpring } from 'motion/react'
 import { Icon } from '@iconify/react'
 
+
 interface Contact {
   title: string
   value: string
@@ -190,10 +191,8 @@ const ContactSection = () => {
   const sectionRef = useRef<HTMLElement>(null)
 
   return (
-    <section ref={sectionRef} id="contact" className="relative py-20 overflow-hidden bg-[#0B1120]">
-      {/* Простой фон */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-900/50 via-slate-900/30 to-slate-900/50" />
-
+    <section ref={sectionRef} id="contact" className="relative py-20 overflow-hidden">
+      
       {/* Контент */}
       <div className="relative z-10 px-4 mx-auto max-w-7xl">
         {/* Заголовок секции */}
@@ -209,7 +208,7 @@ const ContactSection = () => {
             whileHover={{ scale: 1.05 }}
           >
             <h2 className="text-5xl md:text-6xl font-bold">
-              <span className="text-transparent bg-gradient-to-r from-blue-400 via-purple-400 to-pink-400 bg-clip-text">
+              <span className="text-transparent bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text">
                 Давайте работать вместе
               </span>
             </h2>

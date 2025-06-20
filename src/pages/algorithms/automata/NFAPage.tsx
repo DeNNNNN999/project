@@ -309,7 +309,7 @@ const NFAVisualization = () => {
       history: []
     });
     
-    setExplanationText(`NFA в начальном состоянии: q0. ε-замыкание: {${initialClosure.join(', ')}}`);
+    setExplanationText('NFA в начальном состоянии: q0. ε-замыкание: {' + initialClosure.join(', ') + '}');
   };
 
   // Эффект для автоматического обновления при изменении входной строки
@@ -402,7 +402,7 @@ const NFAVisualization = () => {
       const isAccept = isAcceptState(finalStates);
       setIsAccepted(isAccept);
       setIsPlaying(false);
-      setExplanationText(`Строка ${isAccept ? 'принята' : 'отвергнута'}. Конечные состояния: {${finalStates.join(', ')}}`);
+      setExplanationText('Строка ' + (isAccept ? 'принята' : 'отвергнута') + '. Конечные состояния: {' + finalStates.join(', ') + '}');
       return;
     }
     
@@ -413,7 +413,7 @@ const NFAVisualization = () => {
       // Нет переходов для данного символа
       setIsAccepted(false);
       setIsPlaying(false);
-      setExplanationText(`Строка отвергнута. Нет переходов из {${animationState.currentStates.join(', ')}} по символу ${symbol}`);
+      setExplanationText('Строка отвергнута. Нет переходов из {' + animationState.currentStates.join(', ') + '} по символу ' + symbol);
       return;
     }
     
@@ -441,15 +441,14 @@ const NFAVisualization = () => {
     
     // Обновляем текущий шаг и пояснительный текст
     setCurrentStep(prev => prev + 1);
-    setExplanationText(`Переход из {${animationState.currentStates.join(', ')}} в {${nextStates.join(', ')}} по символу ${symbol}.
-     ε-замыкание: {${epsilonClosure.join(', ')}}`);
+    setExplanationText('Переход из {' + animationState.currentStates.join(', ') + '} в {' + nextStates.join(', ') + '} по символу ' + symbol + '. ε-замыкание: {' + epsilonClosure.join(', ') + '}');
     
     // Проверяем, завершилась ли обработка строки
     if (currentStep === inputString.length - 1) {
       setTimeout(() => {
         const isFinalAccepted = isAcceptState(epsilonClosure);
         setIsAccepted(isFinalAccepted);
-        setExplanationText(`Строка ${isFinalAccepted ? 'принята' : 'отвергнута'}. Конечные состояния: {${epsilonClosure.join(', ')}}`);
+        setExplanationText('Строка ' + (isFinalAccepted ? 'принята' : 'отвергнута') + '. Конечные состояния: {' + epsilonClosure.join(', ') + '}');
         setIsPlaying(false);
       }, 500);
     }
@@ -512,10 +511,10 @@ const NFAVisualization = () => {
       // Обновляем пояснительный текст
       if (currentStep === 1) {
         const initialClosure = computeEpsilonClosure(['q0']);
-        setExplanationText(`NFA в начальном состоянии: q0. ε-замыкание: {${initialClosure.join(', ')}}`);
+        setExplanationText('NFA в начальном состоянии: q0. ε-замыкание: {' + initialClosure.join(', ') + '}');
       } else {
         const prevHistory = animationState.history[currentStep - 2];
-        setExplanationText(`Переход из {${prevHistory.states.join(', ')}} в {${prevHistory.nextStates.join(', ')}} по символу ${prevHistory.symbol}`);
+        setExplanationText('Переход из {' + prevHistory.states.join(', ') + '} в {' + prevHistory.nextStates.join(', ') + '} по символу ' + prevHistory.symbol);
       }
       
       setIsAccepted(null);
@@ -760,7 +759,7 @@ const NFAVisualization = () => {
         </div>
         
         <p className="text-slate-300">
-          Этот NFA распознает язык строк над алфавитом {"{a, b}"}, которые содержат подстроку "aba". 
+          Этот NFA распознает язык строк над алфавитом «a, b», которые содержат подстроку "aba". 
           Автомат использует недетерминизм и ε-переходы для отслеживания различных возможных путей 
           обработки входной строки. Ключевые особенности:
         </p>
@@ -1080,7 +1079,7 @@ const AlgorithmExplanation = () => {
       <ul className="pl-5 mb-6 space-y-2 list-disc">
         <li><strong>Q</strong> — конечное множество состояний</li>
         <li><strong>Σ</strong> — конечный алфавит (множество входных символов)</li>
-        <li><strong>δ: Q × (Σ ∪ {ε}) → 2^Q</strong> — функция перехода, определяющая множество возможных 
+        <li><strong>δ: Q × (Σ ∪ {'ε'}) → 2^Q</strong> — функция перехода, определяющая множество возможных 
           следующих состояний для каждой пары (текущее состояние, входной символ или ε)</li>
         <li><strong>q₀ ∈ Q</strong> — начальное состояние</li>
         <li><strong>F ⊆ Q</strong> — множество принимающих состояний</li>

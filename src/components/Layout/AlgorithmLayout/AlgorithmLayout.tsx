@@ -1,9 +1,11 @@
-import React, { ReactNode } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { motion } from 'motion/react';
+import React, { useState } from 'react';
+import { Link } from 'react-router-dom';
+import { motion, AnimatePresence } from 'motion/react';
 import { Icon } from '@iconify/react';
+import { AlgorithmComplexity } from '../../../data/algorithms-data';
+import PageWrapper from '../PageWrapper';
 
-interface AlgorithmCategory {
+interface Category {
   id: string;
   name: string;
   icon: string;
@@ -18,17 +20,13 @@ interface RelatedAlgorithm {
 interface AlgorithmLayoutProps {
   title: string;
   description: string;
-  complexity: {
-    time: string;
-    space: string;
-  };
-  category: AlgorithmCategory;
-  relatedAlgorithms: RelatedAlgorithm[];
-  implementation?: ReactNode;
-  visualization?: ReactNode;
-  explanation?: ReactNode;
-  applications?: ReactNode;
-  children?: ReactNode;
+  complexity: AlgorithmComplexity;
+  category: Category;
+  relatedAlgorithms?: RelatedAlgorithm[];
+  visualization: React.ReactNode;
+  implementation: React.ReactNode;
+  explanation: React.ReactNode;
+  applications?: React.ReactNode;
 }
 
 const AlgorithmLayout: React.FC<AlgorithmLayoutProps> = ({
@@ -36,203 +34,237 @@ const AlgorithmLayout: React.FC<AlgorithmLayoutProps> = ({
   description,
   complexity,
   category,
-  relatedAlgorithms,
-  implementation,
+  relatedAlgorithms = [],
   visualization,
+  implementation,
   explanation,
   applications,
-  children
 }) => {
-  const navigate = useNavigate();
+  const [activeTab, setActiveTab] = useState<'visualization' | 'implementation' | 'explanation' | 'applications'>('visualization');
+
+  const tabs = [
+    { id: 'visualization', label: 'Визуализация', icon: 'mdi:eye' },
+    { id: 'implementation', label: 'Реализация', icon: 'mdi:code-braces' },
+    { id: 'explanation', label: 'Объяснение', icon: 'mdi:book-open-page-variant' },
+    ...(applications ? [{ id: 'applications', label: 'Применение', icon: 'mdi:lightbulb' }] : []),
+  ] as const;
 
   return (
-    <div className="relative min-h-screen py-32 bg-slate-900">
-      {/* Фоновый градиент */}
-      <div className="absolute inset-0 overflow-hidden -z-10">
-        <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-blue-900/10 to-slate-900" />
+    <PageWrapper>
+      <div className="bg-slate-900 text-white">
+      <div className="container mx-auto px-4 py-8">
+        {/* Header */}
         <motion.div
-          className="absolute inset-0 opacity-20"
-          style={{
-            background: 'radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.3), transparent 60%)',
-          }}
-          animate={{
-            scale: [1, 1.2, 1],
-            opacity: [0.1, 0.2, 0.1],
-          }}
-          transition={{
-            duration: 8,
-            repeat: Infinity,
-            ease: "easeInOut"
-          }}
-        />
-      </div>
-
-      <div className="container relative z-10 px-4 mx-auto">
-        {/* Навигационная цепочка */}
-        <div className="mb-8">
-          <motion.div 
-            className="flex items-center space-x-2 text-sm text-slate-400"
-            initial={{ opacity: 0, y: 10 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ duration: 0.3 }}
-          >
-            <Link to="/" className="hover:text-white">Главная</Link>
-            <Icon icon="ph:caret-right" />
-            <Link to="/algorithms" className="hover:text-white">Алгоритмы</Link>
-            <Icon icon="ph:caret-right" />
-            <Link to={`/algorithms/${category.id.toLowerCase()}`} className="hover:text-white">{category.name}</Link>
-            <Icon icon="ph:caret-right" />
-            <span className="text-white">{title}</span>
-          </motion.div>
-        </div>
-
-        {/* Заголовок и описание */}
-        <motion.div 
-          className="mb-12 text-center"
-          initial={{ opacity: 0, y: 20 }}
+          initial={{ opacity: 0, y: -20 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          className="mb-8"
         >
-          <div className="inline-flex items-center px-4 py-2 mb-4 space-x-2 rounded-full bg-blue-900/30 border border-blue-700/30">
-            <Icon icon={category.icon} className="w-5 h-5 text-blue-400" />
-            <span className="text-sm font-medium text-blue-300">{category.name}</span>
+          <div className="flex items-center gap-4 text-sm mb-4">
+            <Link to="/algorithms" className="text-slate-400 hover:text-white transition-colors">
+              Алгоритмы
+            </Link>
+            <Icon icon="mdi:chevron-right" className="w-4 h-4 text-slate-600" />
+            <Link to={`/algorithms/${category.id}`} className="text-slate-400 hover:text-white transition-colors">
+              {category.name}
+            </Link>
+            <Icon icon="mdi:chevron-right" className="w-4 h-4 text-slate-600" />
+            <span className="text-white">{title}</span>
           </div>
-          
-          <h1 className="mb-4 text-4xl font-bold text-transparent md:text-5xl bg-gradient-to-r from-blue-400 via-indigo-400 to-purple-400 bg-clip-text">
-            {title}
-          </h1>
-          
-          <p className="max-w-3xl mx-auto text-lg text-slate-300">
-            {description}
-          </p>
+
+          <div className="flex items-start gap-6 mb-6">
+            <div className="p-4 bg-gradient-to-br from-blue-600/20 to-purple-600/20 rounded-xl">
+              <Icon icon={category.icon} className="w-12 h-12 text-blue-400" />
+            </div>
+            
+            <div className="flex-1">
+              <h1 className="text-4xl font-bold mb-3">{title}</h1>
+              <p className="text-xl text-slate-300 mb-4">{description}</p>
+              
+              {/* Complexity badges */}
+              <div className="flex flex-wrap gap-3">
+                <div className="px-4 py-2 bg-green-900/30 border border-green-700/50 rounded-lg">
+                  <span className="text-green-400 text-sm font-medium">Время: </span>
+                  <span className="text-white font-mono">{complexity.time}</span>
+                </div>
+                <div className="px-4 py-2 bg-purple-900/30 border border-purple-700/50 rounded-lg">
+                  <span className="text-purple-400 text-sm font-medium">Память: </span>
+                  <span className="text-white font-mono">{complexity.space}</span>
+                </div>
+                {complexity.note && (
+                  <div className="px-4 py-2 bg-amber-900/30 border border-amber-700/50 rounded-lg">
+                    <span className="text-amber-400 text-sm">⚠️ {complexity.note}</span>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
         </motion.div>
 
-        {/* Основная сетка контента */}
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
-          {/* Сайдбар */}
-          <div className="lg:col-span-1">
-            <motion.div 
-              className="sticky space-y-6 top-8"
-              initial={{ opacity: 0, x: -20 }}
-              animate={{ opacity: 1, x: 0 }}
-              transition={{ duration: 0.5, delay: 0.2 }}
-            >
-              {/* Временная и пространственная сложность */}
-              <div className="p-6 border rounded-xl bg-slate-800/70 border-slate-700/50">
-                <h3 className="mb-4 text-xl font-bold text-white">Сложность</h3>
-                <div className="space-y-3">
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-300">Временная:</span>
-                    <span className="px-3 py-1 text-sm font-medium rounded-full bg-blue-900/30 text-blue-300">
-                      {complexity.time}
-                    </span>
-                  </div>
-                  <div className="flex items-center justify-between">
-                    <span className="text-slate-300">Пространственная:</span>
-                    <span className="px-3 py-1 text-sm font-medium rounded-full bg-purple-900/30 text-purple-300">
-                      {complexity.space}
-                    </span>
-                  </div>
-                </div>
-              </div>
-
-              {/* Связанные алгоритмы */}
-              <div className="p-6 border rounded-xl bg-slate-800/70 border-slate-700/50">
-                <h3 className="mb-4 text-xl font-bold text-white">Связанные алгоритмы</h3>
-                <ul className="space-y-2">
-                  {relatedAlgorithms.map((algo) => (
-                    <li key={algo.id}>
-                      <Link 
-                        to={algo.path}
-                        className="flex items-center px-3 py-2 space-x-2 transition-colors rounded-lg hover:bg-slate-700/50 text-slate-300 hover:text-white"
-                      >
-                        <Icon icon="ph:algorithm" className="w-5 h-5" />
-                        <span>{algo.name}</span>
-                      </Link>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-
-              {/* Кнопка возврата к списку */}
-              <motion.button
-                onClick={() => navigate('/algorithms')}
-                className="flex items-center justify-center w-full gap-2 px-4 py-3 font-medium text-white transition-colors border rounded-xl bg-slate-800 hover:bg-slate-700 border-slate-700"
-                whileHover={{ scale: 1.02 }}
-                whileTap={{ scale: 0.98 }}
+        {/* Tabs */}
+        <div className="mb-8">
+          <div className="flex flex-wrap gap-2 p-1 bg-slate-800 rounded-lg">
+            {tabs.map((tab) => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id as any)}
+                className={`flex items-center gap-2 px-6 py-3 rounded-lg font-medium transition-all ${
+                  activeTab === tab.id
+                    ? 'bg-blue-600 text-white shadow-lg shadow-blue-600/20'
+                    : 'text-slate-400 hover:text-white hover:bg-slate-700'
+                }`}
               >
-                <Icon icon="ph:arrow-left" className="w-5 h-5" />
-                <span>Ко всем алгоритмам</span>
-              </motion.button>
-            </motion.div>
+                <Icon icon={tab.icon} className="w-5 h-5" />
+                {tab.label}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Content */}
+        <div className="grid lg:grid-cols-4 gap-8">
+          {/* Main content */}
+          <div className="lg:col-span-3">
+            <AnimatePresence mode="wait">
+              <motion.div
+                key={activeTab}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: -20 }}
+                transition={{ duration: 0.3 }}
+              >
+                {activeTab === 'visualization' && (
+                  <div className="bg-slate-800 rounded-lg p-6">
+                    {visualization}
+                  </div>
+                )}
+                
+                {activeTab === 'implementation' && (
+                  <div className="bg-slate-800 rounded-lg p-6">
+                    {implementation}
+                  </div>
+                )}
+                
+                {activeTab === 'explanation' && (
+                  <div className="bg-slate-800 rounded-lg p-6 prose prose-invert max-w-none">
+                    {explanation}
+                  </div>
+                )}
+                
+                {activeTab === 'applications' && applications && (
+                  <div className="bg-slate-800 rounded-lg p-6 prose prose-invert max-w-none">
+                    {applications}
+                  </div>
+                )}
+              </motion.div>
+            </AnimatePresence>
           </div>
 
-          {/* Основное содержимое */}
-          <div className="lg:col-span-2 space-y-8">
-            {/* Визуализация */}
-            {visualization && (
+          {/* Sidebar */}
+          <div className="space-y-6">
+            {/* Quick info */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.2 }}
+              className="bg-slate-800 rounded-lg p-6"
+            >
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Icon icon="mdi:information" className="w-5 h-5 text-blue-400" />
+                Краткая информация
+              </h3>
+              
+              <div className="space-y-3 text-sm">
+                <div>
+                  <span className="text-slate-400">Категория:</span>
+                  <div className="mt-1 flex items-center gap-2">
+                    <Icon icon={category.icon} className="w-4 h-4 text-blue-400" />
+                    <span className="text-white">{category.name}</span>
+                  </div>
+                </div>
+                
+                <div>
+                  <span className="text-slate-400">Сложность по времени:</span>
+                  <div className="mt-1 font-mono text-green-400">{complexity.time}</div>
+                </div>
+                
+                <div>
+                  <span className="text-slate-400">Сложность по памяти:</span>
+                  <div className="mt-1 font-mono text-purple-400">{complexity.space}</div>
+                </div>
+              </div>
+            </motion.div>
+
+            {/* Related algorithms */}
+            {relatedAlgorithms.length > 0 && (
               <motion.div
-                className="p-6 border rounded-xl bg-slate-800/70 border-slate-700/50"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.3 }}
+                initial={{ opacity: 0, x: 20 }}
+                animate={{ opacity: 1, x: 0 }}
+                transition={{ delay: 0.3 }}
+                className="bg-slate-800 rounded-lg p-6"
               >
-                <h2 className="mb-4 text-2xl font-bold text-white">Визуализация</h2>
-                <div className="overflow-hidden border rounded-lg min-h-[400px] border-slate-700/50">
-                  {visualization}
+                <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                  <Icon icon="mdi:link-variant" className="w-5 h-5 text-purple-400" />
+                  Похожие алгоритмы
+                </h3>
+                
+                <div className="space-y-2">
+                  {relatedAlgorithms.map((algo) => (
+                    <Link
+                      key={algo.id}
+                      to={algo.path}
+                      className="block p-3 bg-slate-700/50 rounded-lg hover:bg-slate-700 transition-colors"
+                    >
+                      <div className="flex items-center gap-2">
+                        <Icon icon="mdi:arrow-right" className="w-4 h-4 text-slate-400" />
+                        <span className="text-white">{algo.name}</span>
+                      </div>
+                    </Link>
+                  ))}
                 </div>
               </motion.div>
             )}
 
-            {/* Объяснение */}
-            {explanation && (
-              <motion.div
-                className="p-6 border rounded-xl bg-slate-800/70 border-slate-700/50"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.4 }}
-              >
-                <h2 className="mb-4 text-2xl font-bold text-white">Как это работает</h2>
-                <div className="prose prose-invert max-w-none">
-                  {explanation}
-                </div>
-              </motion.div>
-            )}
-
-            {/* Реализация */}
-            {implementation && (
-              <motion.div
-                className="p-6 border rounded-xl bg-slate-800/70 border-slate-700/50"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.5 }}
-              >
-                <h2 className="mb-4 text-2xl font-bold text-white">Реализация</h2>
-                {implementation}
-              </motion.div>
-            )}
-
-            {/* Применение */}
-            {applications && (
-              <motion.div
-                className="p-6 border rounded-xl bg-slate-800/70 border-slate-700/50"
-                initial={{ opacity: 0, y: 20 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ duration: 0.5, delay: 0.6 }}
-              >
-                <h2 className="mb-4 text-2xl font-bold text-white">Практическое применение</h2>
-                <div className="prose prose-invert max-w-none">
-                  {applications}
-                </div>
-              </motion.div>
-            )}
-
-            {/* Дополнительное содержимое */}
-            {children}
+            {/* Resources */}
+            <motion.div
+              initial={{ opacity: 0, x: 20 }}
+              animate={{ opacity: 1, x: 0 }}
+              transition={{ delay: 0.4 }}
+              className="bg-slate-800 rounded-lg p-6"
+            >
+              <h3 className="text-lg font-semibold mb-4 flex items-center gap-2">
+                <Icon icon="mdi:book-open-variant" className="w-5 h-5 text-amber-400" />
+                Полезные ресурсы
+              </h3>
+              
+              <div className="space-y-3">
+                <a
+                  href="#"
+                  className="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
+                >
+                  <Icon icon="mdi:wikipedia" className="w-4 h-4" />
+                  Wikipedia
+                </a>
+                <a
+                  href="#"
+                  className="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
+                >
+                  <Icon icon="mdi:youtube" className="w-4 h-4" />
+                  Видео объяснение
+                </a>
+                <a
+                  href="#"
+                  className="flex items-center gap-2 text-sm text-slate-300 hover:text-white transition-colors"
+                >
+                  <Icon icon="mdi:github" className="w-4 h-4" />
+                  Примеры на GitHub
+                </a>
+              </div>
+            </motion.div>
           </div>
         </div>
       </div>
-    </div>
+      </div>
+    </PageWrapper>
   );
 };
 

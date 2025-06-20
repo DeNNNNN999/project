@@ -1,12 +1,7 @@
 import { useEffect, useRef, useState, useMemo, useCallback, memo } from 'react'
 import { motion, useMotionTemplate, useMotionValue, AnimatePresence } from 'motion/react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
 import { Icon } from '@iconify/react'
 
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger)
-}
 
 // Типы
 interface Skill {
@@ -487,37 +482,7 @@ const SkillsSection = () => {
   }, [selectedCategory, searchQuery])
   
   return (
-    <section ref={sectionRef} id="skills" className="relative py-20 overflow-hidden bg-[#0B1120]">
-      {/* Фон */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-900/90 via-slate-900/80 to-slate-900/90" />
-      
-      {/* Анимированные круги на фоне */}
-      <div className="absolute inset-0 overflow-hidden">
-        <motion.div
-          className="absolute -top-20 -left-20 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, 100, 0],
-            y: [0, -100, 0],
-          }}
-          transition={{
-            duration: 20,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
-        <motion.div
-          className="absolute -bottom-20 -right-20 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"
-          animate={{
-            x: [0, -100, 0],
-            y: [0, 100, 0],
-          }}
-          transition={{
-            duration: 15,
-            repeat: Infinity,
-            ease: "linear"
-          }}
-        />
-      </div>
+    <section ref={sectionRef} id="skills" className="relative py-20 overflow-hidden">
       
       {/* Контент */}
       <div className="relative z-10 px-4 mx-auto max-w-7xl">
@@ -528,7 +493,7 @@ const SkillsSection = () => {
           viewport={{ once: true }}
           className="mb-12 text-center"
         >
-          <h2 className="mb-4 text-4xl font-bold text-transparent bg-gradient-to-r from-blue-500 via-purple-500 to-pink-500 bg-clip-text">
+          <h2 className="mb-4 text-4xl font-bold text-transparent bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text">
             Мои навыки
           </h2>
           <p className="max-w-2xl mx-auto text-gray-400">
