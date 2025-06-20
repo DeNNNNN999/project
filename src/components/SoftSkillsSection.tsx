@@ -397,7 +397,7 @@ const SoftSkillsSection = () => {
           </motion.div>
           
           <h2 className="text-4xl md:text-5xl font-bold mb-4">
-            <span className="text-transparent bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text">
+            <span className="text-transparent bg-gradient-to-r from-fuchsia-400 via-purple-500 to-violet-600 bg-clip-text">
               Мои софт скиллы
             </span>
           </h2>

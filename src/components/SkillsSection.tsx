@@ -493,7 +493,7 @@ const SkillsSection = () => {
           viewport={{ once: true }}
           className="mb-12 text-center"
         >
-          <h2 className="mb-4 text-4xl font-bold text-transparent bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text">
+          <h2 className="mb-4 text-4xl font-bold text-transparent bg-gradient-to-r from-fuchsia-400 via-purple-500 to-violet-600 bg-clip-text">
             Мои навыки
           </h2>
           <p className="max-w-2xl mx-auto text-gray-400">

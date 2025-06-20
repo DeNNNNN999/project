@@ -19,7 +19,7 @@ const SOCIAL_LINKS: SocialLink[] = [
 ];
 
 // Анимированный текст без постоянной анимации градиента
-const AnimatedText = memo(({ text, delay = 0, gradient = "from-blue-500 via-purple-500 to-pink-500" }: any) => {
+const AnimatedText = memo(({ text, delay = 0, gradient = "from-fuchsia-500 via-purple-500 to-violet-500" }: any) => {
   return (
     <motion.span
       className={`inline-block text-transparent bg-gradient-to-r ${gradient} bg-clip-text`}
@@ -63,7 +63,7 @@ const TypewriterText = memo(({ words }: { words: string[] }) => {
   }, [currentText, currentWord, isDeleting, words]);
 
   return (
-    <span className="relative text-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text">
+    <span className="relative text-transparent bg-gradient-to-r from-fuchsia-500 via-purple-500 to-violet-500 bg-clip-text">
       {currentText}
       <motion.span
         className="absolute -right-8 top-0 text-white"
@@ -85,8 +85,8 @@ const SimpleButton = memo(({ children, primary = true, onClick }: any) => {
       onClick={onClick}
       className={`px-6 py-3 rounded-full flex items-center gap-2 font-medium transition-all ${
         primary
-          ? 'bg-purple-500/20 backdrop-blur-sm border border-purple-500/30 text-white hover:bg-purple-500/30 hover:shadow-lg hover:shadow-purple-500/20'
-          : 'bg-transparent border-2 border-purple-500/30 text-purple-300 hover:text-white hover:bg-purple-500/10'
+          ? 'bg-gradient-to-r from-fuchsia-500/20 to-purple-500/20 backdrop-blur-sm border border-fuchsia-500/30 text-white hover:bg-fuchsia-500/30 hover:shadow-lg hover:shadow-fuchsia-500/20'
+          : 'bg-transparent border-2 border-fuchsia-500/30 text-fuchsia-300 hover:text-white hover:bg-fuchsia-500/10'
       }`}
       whileHover={{ scale: 1.05 }}
       whileTap={{ scale: 0.95 }}
@@ -102,13 +102,13 @@ SimpleButton.displayName = 'SimpleButton';
 const AvailabilityStatus = memo(() => {
   return (
     <motion.div
-      className="inline-flex items-center gap-2 px-4 py-2 bg-purple-500/10 border border-purple-500/30 rounded-full"
+      className="inline-flex items-center gap-2 px-4 py-2 bg-fuchsia-500/10 border border-fuchsia-500/30 rounded-full"
       initial={{ opacity: 0, scale: 0.8 }}
       animate={{ opacity: 1, scale: 1 }}
       transition={{ delay: 1.3 }}
     >
       <motion.div
-        className="w-2 h-2 bg-purple-400 rounded-full"
+        className="w-2 h-2 bg-fuchsia-400 rounded-full"
         animate={{
           scale: [1, 1.5, 1],
           opacity: [1, 0.5, 1]
@@ -119,7 +119,7 @@ const AvailabilityStatus = memo(() => {
           ease: "easeInOut"
         }}
       />
-      <span className="text-sm text-purple-300">Доступен для работы</span>
+      <span className="text-sm text-fuchsia-300">Доступен для работы</span>
     </motion.div>
   );
 });
@@ -141,7 +141,7 @@ const OptimizedAvatar = memo(() => {
     >
       {/* Простое свечение при наведении */}
       <motion.div
-        className="absolute -inset-4 rounded-full bg-purple-500/50 opacity-0 blur-xl"
+        className="absolute -inset-4 rounded-full bg-gradient-to-r from-fuchsia-500/50 to-purple-500/50 opacity-0 blur-xl"
         animate={{ opacity: isHovered ? 0.4 : 0 }}
         transition={{ duration: 0.3 }}
       />
@@ -159,7 +159,7 @@ const OptimizedAvatar = memo(() => {
         whileHover={{ scale: 1.05 }}
         transition={{ type: "spring", stiffness: 300, damping: 20 }}
       >
-        <div className="w-full h-full p-2 rounded-full bg-gradient-to-br from-purple-400 to-purple-600">
+        <div className="w-full h-full p-2 rounded-full bg-gradient-to-br from-fuchsia-500 via-purple-500 to-violet-600">
           <div className="relative w-full h-full overflow-hidden rounded-full bg-slate-900">
             <img
               src={avatarImage}
@@ -236,7 +236,7 @@ const HeroSection = () => {
             className="space-y-4"
           >
             <motion.div
-              className="inline-block px-4 py-1 mb-4 text-sm font-medium text-purple-300 border rounded-full bg-purple-900/20 border-purple-700/30"
+              className="inline-block px-4 py-1 mb-4 text-sm font-medium text-fuchsia-300 border rounded-full bg-fuchsia-900/20 border-fuchsia-700/30"
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.2 }}
@@ -247,7 +247,7 @@ const HeroSection = () => {
             <h1 className="text-5xl font-bold leading-tight md:text-6xl">
               <AnimatedText text="Full-Stack" delay={0.3} />
               <br />
-              <AnimatedText text="Developer" delay={0.5} gradient="from-pink-500 via-purple-500 to-blue-500" />
+              <AnimatedText text="Developer" delay={0.5} gradient="from-violet-500 via-purple-500 to-fuchsia-500" />
             </h1>
 
             {/* Typewriter под основным заголовком */}
@@ -267,7 +267,7 @@ const HeroSection = () => {
             animate={{ opacity: 1 }}
             transition={{ delay: 0.7, duration: 0.8 }}
           >
-            Я <span className="font-semibold text-purple-400">DeNN999</span>, создающий современные и
+            Я <span className="font-semibold text-fuchsia-400">DeNN999</span>, создающий современные и
             функциональные веб-приложения. Мой стек включает React, TypeScript, Node.js и современные инструменты
             разработки.
           </motion.p>

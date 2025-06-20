@@ -225,48 +225,7 @@ const globalCategories: Category[] = [
 ]
 
 
-const AnimatedBackground: React.FC = () => {
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 20 }).map((_, i) => ({
-        id: i,
-        width: Math.random() * 2 + 0.5,
-        height: Math.random() * 2 + 0.5,
-        left: `${Math.random() * 100}%`,
-        top: `${Math.random() * 100}%`,
-        background: `rgba(${Math.floor(Math.random() * 80 + 100)}, ${Math.floor(
-          Math.random() * 80 + 100,
-        )}, ${Math.floor(Math.random() * 100 + 155)}, ${Math.random() * 0.2 + 0.05})`,
-        boxShadow: '0 0 5px rgba(100, 100, 255, 0.15)',
-        duration: Math.random() * 10 + 8,
-        delay: Math.random() * 3,
-        xRange: Math.random() * 40 - 20,
-        yRange: Math.random() * 40 - 20,
-      })),
-    [],
-  )
-  return (
-    <div className="fixed inset-0 -z-10 overflow-hidden bg-[#0F172A]">
-      {' '}
-      {particles.map(p => (
-        <motion.div
-          key={p.id}
-          className="absolute rounded-full"
-          style={{
-            width: p.width,
-            height: p.height,
-            left: p.left,
-            top: p.top,
-            background: p.background,
-            boxShadow: p.boxShadow,
-          }}
-          animate={{ opacity: [0.1, 0.5, 0.1], scale: [1, 1.05, 1], x: [0, p.xRange, 0], y: [0, p.yRange, 0] }}
-          transition={{ duration: p.duration, repeat: Infinity, ease: 'linear', delay: p.delay }}
-        />
-      ))}{' '}
-    </div>
-  )
-}
+// AnimatedBackground теперь используется глобально в App.tsx
 
 
 interface TechnologyCardProps {
@@ -667,8 +626,7 @@ const ResearchPage: React.FC = () => {
   }, [debouncedSearchTerm])
 
   return (
-    <div className="relative min-h-screen text-white bg-[#0F172A]">
-      <AnimatedBackground />
+    <div className="relative min-h-screen text-white">
       <main className="container relative z-10 px-4 pt-24 pb-20 mx-auto md:pt-32">
         <motion.div
           className="mb-12 text-center md:text-left"

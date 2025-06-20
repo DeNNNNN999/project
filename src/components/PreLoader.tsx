@@ -28,13 +28,13 @@ const PreLoader = () => {
           initial={{ opacity: 0 }}
           animate={{ opacity: 1 }}
           exit={{ opacity: 0, transition: { duration: 0.5 } }}
-          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-gradient-to-br from-[#0B1120] via-[#0F0A1F] to-[#050510]">
+          className="fixed inset-0 z-50 flex flex-col items-center justify-center bg-black">
           {/* Анимированные градиентные сферы на фоне */}
           <div className="absolute inset-0 overflow-hidden">
             <motion.div
               className="absolute w-[600px] h-[600px] -top-48 -left-48 rounded-full"
               style={{
-                background: 'radial-gradient(circle, #EC489940 0%, transparent 70%)',
+                background: 'radial-gradient(circle, #d026ff40 0%, transparent 70%)',
                 filter: 'blur(60px)',
               }}
               animate={{
@@ -77,7 +77,7 @@ const PreLoader = () => {
                 className="absolute inset-0 rounded-full"
                 style={{
                   border: '2px solid',
-                  borderColor: i === 0 ? '#EC4899' : i === 1 ? '#8B5CF6' : '#3B82F6',
+                  borderColor: i === 0 ? '#d026ff' : i === 1 ? '#8B5CF6' : '#7c3aed',
                   opacity: 0.3,
                 }}
                 initial={{ scale: 0.8, opacity: 0 }}
@@ -99,7 +99,7 @@ const PreLoader = () => {
               className="relative flex items-center justify-center w-32 h-32 rounded-full"
               style={{
                 background:
-                  'linear-gradient(135deg, rgba(236, 72, 153, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(59, 130, 246, 0.1) 100%)',
+                  'linear-gradient(135deg, rgba(208, 38, 255, 0.1) 0%, rgba(139, 92, 246, 0.1) 50%, rgba(124, 58, 237, 0.1) 100%)',
                 backdropFilter: 'blur(10px)',
                 border: '1px solid rgba(255, 255, 255, 0.1)',
               }}
@@ -115,7 +115,7 @@ const PreLoader = () => {
               <div className="relative">
                 <Icon icon="logos:react" className="w-16 h-16 relative z-10" />
                 <motion.div
-                  className="absolute inset-0 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 blur-lg opacity-50"
+                  className="absolute inset-0 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-violet-500 blur-lg opacity-50"
                   animate={{
                     scale: [0.8, 1.2, 0.8],
                   }}
@@ -135,7 +135,7 @@ const PreLoader = () => {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.5 }}
             className="mt-12 text-center">
-            <h2 className="text-2xl font-bold text-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text animate-gradient-text">
+            <h2 className="text-2xl font-bold text-transparent bg-gradient-to-r from-fuchsia-500 via-purple-500 to-violet-500 bg-clip-text animate-gradient-text">
               Инициализация портфолио
             </h2>
           </motion.div>
@@ -147,7 +147,7 @@ const PreLoader = () => {
               animate={{ width: `${progress}%` }}
               className="h-full relative"
               style={{
-                background: 'linear-gradient(90deg, #EC4899 0%, #8B5CF6 50%, #3B82F6 100%)',
+                background: 'linear-gradient(90deg, #d026ff 0%, #8B5CF6 50%, #7c3aed 100%)',
               }}>
               {/* Свечение на конце прогресс бара */}
               <motion.div
@@ -175,7 +175,7 @@ const PreLoader = () => {
             transition={{ delay: 0.7 }}
             className="mt-4 font-mono text-sm">
             <span className="text-gray-400">Загрузка: </span>
-            <span className="text-transparent bg-gradient-to-r from-pink-500 to-purple-500 bg-clip-text font-bold">
+            <span className="text-transparent bg-gradient-to-r from-fuchsia-500 to-purple-500 bg-clip-text font-bold">
               {progress}%
             </span>
           </motion.div>
@@ -185,7 +185,7 @@ const PreLoader = () => {
             {[...Array(3)].map((_, i) => (
               <motion.div
                 key={i}
-                className="w-2 h-2 rounded-full bg-gradient-to-r from-pink-500 to-purple-500"
+                className="w-2 h-2 rounded-full bg-gradient-to-r from-fuchsia-500 to-purple-500"
                 animate={{
                   y: [0, -10, 0],
                   opacity: [0.5, 1, 0.5],

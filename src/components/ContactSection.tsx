@@ -208,7 +208,7 @@ const ContactSection = () => {
             whileHover={{ scale: 1.05 }}
           >
             <h2 className="text-5xl md:text-6xl font-bold">
-              <span className="text-transparent bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text">
+              <span className="text-transparent bg-gradient-to-r from-fuchsia-400 via-purple-500 to-violet-600 bg-clip-text">
                 Давайте работать вместе
               </span>
             </h2>

@@ -43,20 +43,17 @@ import NewtonMethodPage from './pages/algorithms/numerical/NewtonMethodPage';
 
 import Footer from './components/Footer';
 import PreLoader from './components/PreLoader';
-import MinimalPurpleBackground from './components/MinimalPurpleBackground';
 import SimpleFPSCounter from './components/SimpleFPSCounter';
+import AnimatedBackground from './components/AnimatedBackground';
 
 const App = () => {
   const location = useLocation();
-  
-  // Проверяем, находимся ли мы на страницах research или algorithms
-  const hideBackground = location.pathname.includes('/research') || location.pathname.includes('/algorithms');
 
   return (
-    <div className="min-h-screen text-white bg-black">
+    <div className="min-h-screen text-white bg-slate-900">
+      <AnimatedBackground />
       <PreLoader />
       {process.env.NODE_ENV === 'development' && <SimpleFPSCounter />}
-      {!hideBackground && <MinimalPurpleBackground intensity="medium" />}
       <main className="relative z-10 min-h-screen">
         <TopNav />
         <Routes>

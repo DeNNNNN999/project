@@ -14,6 +14,7 @@ interface Project {
   githubUrl?: string
   color: string
   technologies: string[]
+  category?: string
 }
 
 // Данные проектов - ЗАМЕНИ НА СВОИ РЕАЛЬНЫЕ ПРОЕКТЫ И ВИДЕО
@@ -27,7 +28,8 @@ const projects: Project[] = [
     demoUrl: 'https://your-project-1.com',
     githubUrl: 'https://github.com/yourusername/project-1',
     color: '#3B82F6',
-    technologies: ['React', 'Node.js', 'MongoDB', 'Stripe']
+    technologies: ['React', 'Node.js', 'MongoDB', 'Stripe'],
+    category: 'Full-Stack'
   },
   {
     title: 'Social Media Dashboard',
@@ -38,7 +40,8 @@ const projects: Project[] = [
     demoUrl: 'https://your-project-2.com',
     githubUrl: 'https://github.com/yourusername/project-2',
     color: '#8B5CF6',
-    technologies: ['Next.js', 'TypeScript', 'D3.js', 'PostgreSQL']
+    technologies: ['Next.js', 'TypeScript', 'D3.js', 'PostgreSQL'],
+    category: 'Analytics'
   },
   {
     title: 'Task Management App',
@@ -49,7 +52,8 @@ const projects: Project[] = [
     demoUrl: 'https://your-project-3.com',
     githubUrl: 'https://github.com/yourusername/project-3',
     color: '#EC4899',
-    technologies: ['React', 'Socket.io', 'Redis', 'Docker']
+    technologies: ['React', 'Socket.io', 'Redis', 'Docker'],
+    category: 'Real-time'
   },
   {
     title: 'Video Streaming Platform',
@@ -60,7 +64,8 @@ const projects: Project[] = [
     demoUrl: 'https://your-project-4.com',
     githubUrl: 'https://github.com/yourusername/project-4',
     color: '#10B981',
-    technologies: ['React', 'WebRTC', 'HLS.js', 'AWS']
+    technologies: ['React', 'WebRTC', 'HLS.js', 'AWS'],
+    category: 'Streaming'
   },
   {
     title: 'AI Chat Assistant',
@@ -71,7 +76,8 @@ const projects: Project[] = [
     demoUrl: 'https://your-project-5.com',
     githubUrl: 'https://github.com/yourusername/project-5',
     color: '#F59E0B',
-    technologies: ['React', 'OpenAI API', 'Node.js', 'WebSockets']
+    technologies: ['React', 'OpenAI API', 'Node.js', 'WebSockets'],
+    category: 'AI/ML'
   },
   {
     title: 'Portfolio Builder',
@@ -82,7 +88,8 @@ const projects: Project[] = [
     demoUrl: 'https://your-project-6.com',
     githubUrl: 'https://github.com/yourusername/project-6',
     color: '#6366F1',
-    technologies: ['Next.js', 'Tailwind CSS', 'Prisma', 'Vercel']
+    technologies: ['Next.js', 'Tailwind CSS', 'Prisma', 'Vercel'],
+    category: 'SaaS'
   }
 ]
 
@@ -148,31 +155,80 @@ const ProjectCard = memo(({ project, index }: { project: Project; index: number 
   return (
     <motion.div
     ref={cardRef}
-    className="relative overflow-hidden shadow-lg rounded-2xl bg-white/5 backdrop-blur-xl group border border-white/10 hover:border-purple-500/30 transition-all duration-300"
+    className="relative overflow-hidden shadow-lg rounded-2xl backdrop-blur-xl group transition-all duration-300"
     style={{ 
-    boxShadow: `0 10px 30px -15px rgba(139, 92, 246, 0.2)`,
+    background: `linear-gradient(135deg, ${hexToRGBA(project.color, 0.1)} 0%, rgba(0,0,0,0.5) 50%, ${hexToRGBA(project.color, 0.05)} 100%)`,
+    border: `1px solid ${hexToRGBA(project.color, 0.3)}`,
+    boxShadow: `0 10px 30px -15px ${hexToRGBA(project.color, 0.5)}`,
     }}
-    initial={{ opacity: 0, y: 50 }}
-    animate={isInView ? { opacity: 1, y: 0 } : {}}
-    transition={{ duration: 0.5, delay: index * 0.1 }}
+    initial={{ 
+      opacity: 0, 
+      y: index % 2 === 0 ? 50 : -30,
+      x: index % 3 === 0 ? -30 : index % 3 === 1 ? 30 : 0,
+      rotateY: index % 2 === 0 ? -5 : 5
+    }}
+    animate={isInView ? { 
+      opacity: 1, 
+      y: 0,
+      x: 0,
+      rotateY: 0
+    } : {}}
+    transition={{ 
+      duration: 0.6, 
+      delay: index * 0.15,
+      ease: [0.25, 0.1, 0.25, 1]
+    }}
     onMouseEnter={() => setIsHovered(true)}
     onMouseLeave={() => setIsHovered(false)}
-    whileHover={{ y: -5, scale: 1.02, transition: { duration: 0.2 } }}
+    whileHover={{ 
+      y: index % 2 === 0 ? -8 : -5, 
+      scale: index % 3 === 0 ? 1.03 : 1.02,
+      rotateY: index % 3 === 1 ? 2 : 0,
+      rotateX: index % 3 === 2 ? -1 : 0,
+      transition: { duration: 0.3, ease: "easeOut" } 
+    }}
     >
-    {/* Минималистичное свечение */}
+    {/* Уникальное свечение для каждой карточки */}
     <div
-    className="absolute inset-0 opacity-0 transition-all duration-500 group-hover:opacity-30"
+    className="absolute inset-0 opacity-0 transition-all duration-500 group-hover:opacity-40"
     style={{
-    background: `radial-gradient(circle at 50% 50%, rgba(139, 92, 246, 0.2), transparent 70%)`,
-          filter: 'blur(60px)',
-        }}
-      />
+    background: `radial-gradient(circle at ${index % 2 === 0 ? '30% 30%' : '70% 70%'}, ${hexToRGBA(project.color, 0.4)}, transparent 70%)`,
+    filter: 'blur(60px)',
+    }}
+    />
       
-      {/* Декоративная линия */}
+      {/* Декоративные элементы */}
       <div 
-        className="absolute top-0 left-0 right-0 h-0.5 opacity-50"
+        className="absolute top-0 left-0 right-0 h-1 opacity-70"
         style={{ 
           background: `linear-gradient(90deg, transparent, ${project.color}, transparent)` 
+        }} 
+      />
+      
+      {/* Номер проекта */}
+      <div 
+        className="absolute top-4 right-4 w-10 h-10 rounded-full flex items-center justify-center backdrop-blur-md transition-all duration-300 group-hover:scale-110 z-10"
+        style={{ 
+          background: `${hexToRGBA(project.color, 0.2)}`,
+          border: `2px solid ${hexToRGBA(project.color, 0.5)}`,
+          boxShadow: `0 0 20px ${hexToRGBA(project.color, 0.3)}`
+        }}
+      >
+        <span className="text-sm font-bold" style={{ color: project.color }}>
+          {String(index + 1).padStart(2, '0')}
+        </span>
+      </div>
+      
+      {/* Уникальный паттерн для каждой карточки */}
+      <div 
+        className="absolute inset-0 opacity-[0.03] pointer-events-none"
+        style={{ 
+          backgroundImage: index % 3 === 0 
+            ? `radial-gradient(${hexToRGBA(project.color, 0.3)} 1px, transparent 1px)`
+            : index % 3 === 1
+            ? `linear-gradient(45deg, ${hexToRGBA(project.color, 0.1)} 25%, transparent 25%), linear-gradient(-45deg, ${hexToRGBA(project.color, 0.1)} 25%, transparent 25%)`
+            : `linear-gradient(${hexToRGBA(project.color, 0.1)} 1px, transparent 1px), linear-gradient(90deg, ${hexToRGBA(project.color, 0.1)} 1px, transparent 1px)`,
+          backgroundSize: index % 3 === 0 ? '20px 20px' : index % 3 === 1 ? '40px 40px' : '20px 20px',
         }} 
       />
       
@@ -227,7 +283,7 @@ const ProjectCard = memo(({ project, index }: { project: Project; index: number 
       </div>
       
       {/* Текстовое содержимое */}
-      <div className="p-6">
+      <div className="p-6 pb-14 relative">
         <div className="flex items-center gap-3 mb-3">
           <div
             className="flex items-center justify-center p-2 rounded-lg"
@@ -240,8 +296,13 @@ const ProjectCard = memo(({ project, index }: { project: Project; index: number 
             />
           </div>
           
-          <h3 className="text-lg font-bold text-white">
-            {project.title}
+          <h3 className="text-lg font-bold">
+            <span className="bg-gradient-to-r bg-clip-text text-transparent"
+              style={{
+                backgroundImage: `linear-gradient(135deg, ${project.color} 0%, ${hexToRGBA(project.color, 0.7)} 50%, white 100%)`
+              }}>
+              {project.title}
+            </span>
           </h3>
         </div>
         
@@ -251,10 +312,15 @@ const ProjectCard = memo(({ project, index }: { project: Project; index: number 
         
         {/* Технологии */}
         <div className="flex flex-wrap gap-1.5 mb-4">
-          {project.technologies.slice(0, 4).map((tech) => (
+          {project.technologies.slice(0, 4).map((tech, techIndex) => (
             <span
               key={tech}
-              className="px-2 py-1 text-xs text-gray-300 bg-slate-700/50 rounded"
+              className="px-2 py-1 text-xs rounded transition-all duration-200 hover:scale-105"
+              style={{
+                background: `${hexToRGBA(project.color, 0.15)}`,
+                border: `1px solid ${hexToRGBA(project.color, 0.3)}`,
+                color: techIndex === 0 ? project.color : 'rgba(255,255,255,0.8)'
+              }}
             >
               {tech}
             </span>
@@ -294,6 +360,26 @@ const ProjectCard = memo(({ project, index }: { project: Project; index: number 
             </a>
           )}
         </div>
+        
+        {/* Категория проекта */}
+        {project.category && (
+          <div className="absolute bottom-3 left-6 right-6">
+            <div className="flex items-center justify-between py-2 px-3 rounded-lg" 
+              style={{ 
+                background: `${hexToRGBA(project.color, 0.1)}`,
+                border: `1px solid ${hexToRGBA(project.color, 0.2)}` 
+              }}
+            >
+              <span className="text-xs text-gray-400">Категория</span>
+              <span 
+                className="text-xs font-bold tracking-wider uppercase"
+                style={{ color: project.color }}
+              >
+                {project.category}
+              </span>
+            </div>
+          </div>
+        )}
       </div>
     </motion.div>
   )
@@ -314,28 +400,9 @@ const ProjectsSection = () => {
           transition={{ duration: 0.8 }}
           viewport={{ once: true }}
         >
-          {/* Простая иконка вместо тяжелого 3D компонента */}
-          <div className="flex justify-center mb-6">
-            <motion.div
-              className="relative"
-              initial={{ scale: 0.8, opacity: 0 }}
-              whileInView={{ scale: 1, opacity: 1 }}
-              transition={{ duration: 0.5 }}
-              viewport={{ once: true }}
-            >
-              <div className="absolute inset-0 bg-purple-500/30 rounded-full blur-xl"></div>
-              <div className="relative flex items-center justify-center w-20 h-20 bg-purple-500/20 backdrop-blur-sm border border-purple-500/30 rounded-2xl">
-                <Icon icon="ph:code-bold" className="w-10 h-10 text-white" />
-              </div>
-            </motion.div>
-          </div>
-          
-          <h2 className="mb-4 text-4xl font-bold text-transparent bg-gradient-to-r from-purple-400 to-purple-600 bg-clip-text">
+          <h2 className="mb-6 text-5xl font-bold text-transparent bg-gradient-to-r from-fuchsia-400 via-purple-500 to-violet-600 bg-clip-text animate-gradient">
             Мои проекты
           </h2>
-          <p className="max-w-2xl mx-auto text-gray-400">
-            Портфолио избранных работ, демонстрирующих мой опыт в разработке современных веб-приложений
-          </p>
         </motion.div>
         
         {/* Сетка проектов */}
@@ -345,19 +412,7 @@ const ProjectsSection = () => {
           ))}
         </div>
 
-        {/* Инструкция для добавления видео */}
-        <motion.div 
-          className="mt-8 p-4 bg-purple-900/20 border border-purple-500/30 rounded-lg text-center"
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
-          transition={{ duration: 0.5, delay: 0.5 }}
-          viewport={{ once: true }}
-        >
-          <p className="text-sm text-purple-300">
-            💡 Добавь свои видео в папку <code className="px-2 py-1 bg-black/30 rounded">public/videos/</code> 
-            и обнови пути в коде
-          </p>
-        </motion.div>
+
       </div>
     </section>
   )

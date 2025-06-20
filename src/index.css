@@ -49,6 +49,7 @@ body {
   min-width: 320px;
   min-height: 100vh;
   overflow-x: hidden;
+  background-color: #0f172a;
 }
 
 /* Паттерны для фона */

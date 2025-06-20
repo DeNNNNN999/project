@@ -1,110 +1,75 @@
-import React, { useMemo } from 'react';
-import { motion } from 'motion/react';
+import React from 'react';
+import { motion } from 'framer-motion';
 
-const AnimatedBackground: React.FC<{ opacity?: number }> = ({ opacity = 1 }) => {
-  // Генерируем частицы для фона
-  const particles = useMemo(
-    () =>
-      Array.from({ length: 30 }).map((_, i) => ({
-        id: i,
-        width: Math.random() * 3 + 0.5,
-        height: Math.random() * 3 + 0.5,
-        left: `${Math.random() * 100}%`,
-        top: `${Math.random() * 100}%`,
-        background: `rgba(${Math.floor(Math.random() * 80 + 100)}, ${Math.floor(
-          Math.random() * 80 + 100,
-        )}, ${Math.floor(Math.random() * 100 + 155)}, ${Math.random() * 0.25 + 0.05})`,
-        boxShadow: '0 0 5px rgba(100, 100, 255, 0.15)',
-        duration: Math.random() * 12 + 10,
-        delay: Math.random() * 5,
-        xRange: Math.random() * 60 - 30,
-        yRange: Math.random() * 60 - 30,
-      })),
-    [],
-  );
-
-  // Большие светящиеся круги
-  const glowCircles = useMemo(
-    () =>
-      Array.from({ length: 4 }).map((_, i) => ({
-        id: i,
-        width: Math.random() * 300 + 200,
-        height: Math.random() * 300 + 200,
-        left: `${Math.random() * 80 + 10}%`,
-        top: `${Math.random() * 80 + 10}%`,
-        background: `radial-gradient(circle, rgba(${
-          Math.random() > 0.5 ? '62, 82, 163' : '106, 72, 168'
-        }, 0.08) 0%, rgba(${
-          Math.random() > 0.5 ? '41, 53, 94' : '72, 52, 112'
-        }, 0) 70%)`,
-        duration: Math.random() * 60 + 40,
-        delay: Math.random() * 10,
-        scale: [0.8, 1.2, 0.9],
-      })),
-    [],
-  );
-
+// Компонент для анимированного фона с градиентом и частицами
+const AnimatedBackground = () => {
   return (
-    <div className="fixed inset-0 -z-10 overflow-hidden bg-[#0F172A]" style={{ opacity }}>
-      {/* Анимированные частицы */}
-      {particles.map(p => (
+    <div className="fixed inset-0 overflow-hidden -z-10">
+      {/* Основной градиентный фон */}
+      <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-blue-900/20 to-slate-900" />
+
+      {/* Анимированный градиент */}
+      <motion.div
+        className="absolute inset-0 opacity-20"
+        style={{
+          background: 'radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.3), transparent 60%)',
+        }}
+        animate={{
+          scale: [1, 1.2, 1],
+          opacity: [0.1, 0.2, 0.1],
+        }}
+        transition={{
+          duration: 8,
+          repeat: Infinity,
+          ease: "easeInOut"
+        }}
+      />
+
+      {/* Сетка-матрица в стиле кода */}
+      <div className="absolute inset-0 opacity-10">
+        <div className="absolute inset-0 bg-grid-pattern" />
+      </div>
+
+      {/* Плавающие частицы - представляют биты данных */}
+      {Array.from({ length: 30 }).map((_, i) => (
         <motion.div
-          key={p.id}
-          className="absolute rounded-full"
+          key={i}
+          className="absolute bg-blue-500 rounded-full"
           style={{
-            width: p.width,
-            height: p.height,
-            left: p.left,
-            top: p.top,
-            background: p.background,
-            boxShadow: p.boxShadow,
+            width: Math.random() * 3 + 1,
+            height: Math.random() * 3 + 1,
+            left: `${Math.random() * 100}%`,
+            top: `${Math.random() * 100}%`,
+            opacity: Math.random() * 0.4 + 0.1,
           }}
-          animate={{ 
-            opacity: [0.1, 0.5, 0.1], 
-            scale: [1, 1.05, 1], 
-            x: [0, p.xRange, 0], 
-            y: [0, p.yRange, 0] 
+          animate={{
+            y: [0, Math.random() * 100 - 50],
+            x: [0, Math.random() * 40 - 20],
+            opacity: [0.1, 0.3, 0.1],
           }}
-          transition={{ 
-            duration: p.duration, 
-            repeat: Infinity, 
-            ease: 'linear', 
-            delay: p.delay 
+          transition={{
+            duration: Math.random() * 10 + 15,
+            repeat: Infinity,
+            repeatType: "reverse",
+            ease: "easeInOut",
+            delay: Math.random() * 5
           }}
         />
       ))}
 
-      {/* Большие светящиеся круги */}
-      {glowCircles.map(circle => (
-        <motion.div
-          key={`glow-${circle.id}`}
-          className="absolute rounded-full opacity-40"
-          style={{
-            width: circle.width,
-            height: circle.height,
-            left: circle.left,
-            top: circle.top,
-            background: circle.background,
-          }}
-          animate={{ 
-            scale: circle.scale,
-            x: [0, Math.random() * 40 - 20, 0],
-            y: [0, Math.random() * 40 - 20, 0],
-          }}
-          transition={{ 
-            duration: circle.duration, 
-            repeat: Infinity, 
-            ease: 'linear', 
-            delay: circle.delay 
-          }}
-        />
-      ))}
-
-      {/* Градиент сверху */}
-      <div className="absolute top-0 left-0 w-full h-[300px] bg-gradient-to-b from-blue-900/10 to-transparent" />
-      
-      {/* Градиент снизу */}
-      <div className="absolute bottom-0 left-0 w-full h-[300px] bg-gradient-to-t from-slate-900/30 to-transparent" />
+      {/* Световые лучи */}
+      <motion.div
+        className="absolute top-0 left-1/4 w-[1px] h-[30vh] bg-gradient-to-b from-transparent via-blue-500/30 to-transparent"
+        style={{ transform: "rotate(10deg)" }}
+        animate={{ opacity: [0, 0.5, 0], height: ['30vh', '60vh', '30vh'] }}
+        transition={{ duration: 7, repeat: Infinity, repeatType: "reverse" }}
+      />
+      <motion.div
+        className="absolute top-0 right-1/3 w-[1px] h-[40vh] bg-gradient-to-b from-transparent via-purple-500/30 to-transparent"
+        style={{ transform: "rotate(-15deg)" }}
+        animate={{ opacity: [0, 0.6, 0], height: ['40vh', '70vh', '40vh'] }}
+        transition={{ duration: 9, repeat: Infinity, repeatType: "reverse", delay: 3 }}
+      />
     </div>
   );
 };

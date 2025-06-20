@@ -298,12 +298,12 @@ const TopNav = () => {
         transition={{ type: "spring", stiffness: 100, damping: 20 }}
         className={`fixed top-0 left-0 right-0 z-50 backdrop-blur-xl transition-all duration-300 ${
           isScrolled
-            ? 'bg-gradient-to-r from-slate-900/95 via-slate-900/90 to-slate-900/95 shadow-lg shadow-purple-500/10 border-b border-white/10'
-            : 'bg-gradient-to-r from-slate-900/70 via-slate-900/60 to-slate-900/70'
+            ? 'bg-black/80 shadow-lg shadow-purple-500/20 border-b border-purple-500/20'
+            : 'bg-gradient-to-b from-black/60 to-transparent'
         }`}
       >
         {/* Градиентная линия сверху */}
-        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-pink-500/50 to-transparent" />
+        <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-fuchsia-500/50 to-transparent" />
 
         <div className="relative px-4 mx-auto max-w-7xl">
           <div className="flex items-center justify-between h-16">
@@ -321,7 +321,7 @@ const TopNav = () => {
                 transition={{ delay: 0.3 }}
                 className="hidden sm:block"
               >
-                <h1 className="text-xl font-bold text-transparent bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500 bg-clip-text animate-gradient-text">
+                <h1 className="text-xl font-bold text-transparent bg-gradient-to-r from-fuchsia-500 via-purple-500 to-violet-500 bg-clip-text animate-gradient-text">
                   DeNNNNN999
                 </h1>
                 <p className="text-xs text-gray-400"></p>
@@ -355,7 +355,7 @@ const TopNav = () => {
                     {isActive(item) && (
                       <motion.div
                         layoutId="activeNavBg"
-                        className="absolute inset-0 bg-gradient-to-r from-pink-600/20 via-purple-600/20 to-blue-600/20 rounded-lg"
+                        className="absolute inset-0 bg-gradient-to-r from-fuchsia-600/20 via-purple-600/20 to-violet-600/20 rounded-lg"
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                       />
                     )}
@@ -372,7 +372,7 @@ const TopNav = () => {
                     {isActive(item) && (
                       <motion.div
                         layoutId="activeIndicator"
-                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-pink-500 via-purple-500 to-blue-500"
+                        className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-fuchsia-500 via-purple-500 to-violet-500"
                         transition={{ type: "spring", stiffness: 500, damping: 30 }}
                       />
                     )}
@@ -420,8 +420,8 @@ const TopNav = () => {
           className="absolute bottom-0 left-0 h-[2px]"
           style={{
             width: `${scrollProgress * 100}%`,
-            background: 'linear-gradient(90deg, #EC4899 0%, #8B5CF6 50%, #3B82F6 100%)',
-            boxShadow: "0 0 15px rgba(236, 72, 153, 0.6), 0 0 30px rgba(139, 92, 246, 0.4)"
+            background: 'linear-gradient(90deg, #d026ff 0%, #8B5CF6 50%, #7c3aed 100%)',
+            boxShadow: "0 0 20px rgba(208, 38, 255, 0.6), 0 0 40px rgba(139, 92, 246, 0.4)"
           }}
         />
 
@@ -432,7 +432,7 @@ const TopNav = () => {
               initial={{ opacity: 0, height: 0 }}
               animate={{ opacity: 1, height: 'auto' }}
               exit={{ opacity: 0, height: 0 }}
-              className="md:hidden bg-slate-900/95 backdrop-blur-lg border-t border-slate-800"
+              className="md:hidden bg-black/90 backdrop-blur-xl border-t border-purple-800/30"
             >
               <div className="px-4 py-3 space-y-1">
                 {navItems.map((item, index) => (
