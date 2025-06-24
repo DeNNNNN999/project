@@ -1,76 +1,152 @@
-import React from 'react';
+import { useEffect, useRef } from 'react';
 import { motion } from 'framer-motion';
 
-// Компонент для анимированного фона с градиентом и частицами
 const AnimatedBackground = () => {
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    if (!canvas) return;
+
+    const ctx = canvas.getContext('2d');
+    if (!ctx) return;
+
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+
+    // Частицы для эффекта "космической пыли"
+    const particles: Array<{
+      x: number;
+      y: number;
+      size: number;
+      speedX: number;
+      speedY: number;
+      opacity: number;
+    }> = [];
+
+    // Создаем частицы
+    for (let i = 0; i < 50; i++) {
+      particles.push({
+        x: Math.random() * canvas.width,
+        y: Math.random() * canvas.height,
+        size: Math.random() * 2 + 0.5,
+        speedX: (Math.random() - 0.5) * 0.5,
+        speedY: (Math.random() - 0.5) * 0.5,
+        opacity: Math.random() * 0.5 + 0.2
+      });
+    }
+
+    // Анимация
+    const animate = () => {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+      particles.forEach(particle => {
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(147, 51, 234, ${particle.opacity})`; // Фиолетовый
+        ctx.fill();
+
+        particle.x += particle.speedX;
+        particle.y += particle.speedY;
+
+        // Wrap around edges
+        if (particle.x < 0) particle.x = canvas.width;
+        if (particle.x > canvas.width) particle.x = 0;
+        if (particle.y < 0) particle.y = canvas.height;
+        if (particle.y > canvas.height) particle.y = 0;
+      });
+
+      requestAnimationFrame(animate);
+    };
+
+    animate();
+
+    // Resize handler
+    const handleResize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
   return (
-    <div className="fixed inset-0 overflow-hidden -z-10">
-      {/* Основной градиентный фон */}
-      <div className="absolute inset-0 bg-gradient-to-b from-slate-900 via-blue-900/20 to-slate-900" />
-
-      {/* Анимированный градиент */}
-      <motion.div
-        className="absolute inset-0 opacity-20"
-        style={{
-          background: 'radial-gradient(circle at 50% 50%, rgba(59, 130, 246, 0.3), transparent 60%)',
-        }}
-        animate={{
-          scale: [1, 1.2, 1],
-          opacity: [0.1, 0.2, 0.1],
-        }}
-        transition={{
-          duration: 8,
-          repeat: Infinity,
-          ease: "easeInOut"
-        }}
-      />
-
-      {/* Сетка-матрица в стиле кода */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute inset-0 bg-grid-pattern" />
-      </div>
-
-      {/* Плавающие частицы - представляют биты данных */}
-      {Array.from({ length: 30 }).map((_, i) => (
-        <motion.div
-          key={i}
-          className="absolute bg-blue-500 rounded-full"
+    <>
+      {/* Основной градиент - Deep Space */}
+      <div className="fixed inset-0 z-0">
+        <div 
+          className="absolute inset-0"
           style={{
-            width: Math.random() * 3 + 1,
-            height: Math.random() * 3 + 1,
-            left: `${Math.random() * 100}%`,
-            top: `${Math.random() * 100}%`,
-            opacity: Math.random() * 0.4 + 0.1,
-          }}
-          animate={{
-            y: [0, Math.random() * 100 - 50],
-            x: [0, Math.random() * 40 - 20],
-            opacity: [0.1, 0.3, 0.1],
-          }}
-          transition={{
-            duration: Math.random() * 10 + 15,
-            repeat: Infinity,
-            repeatType: "reverse",
-            ease: "easeInOut",
-            delay: Math.random() * 5
+            background: `
+              radial-gradient(ellipse at top, #0d1d31 0%, #0c0d13 100%)
+            `
           }}
         />
-      ))}
+        
+        {/* Mesh gradient overlay для глубины */}
+        <div 
+          className="absolute inset-0 opacity-50"
+          style={{
+            background: `
+              radial-gradient(at 20% 30%, hsla(280, 100%, 74%, 0.15) 0px, transparent 50%),
+              radial-gradient(at 80% 20%, hsla(189, 100%, 56%, 0.1) 0px, transparent 50%),
+              radial-gradient(at 40% 50%, hsla(355, 100%, 93%, 0.05) 0px, transparent 50%),
+              radial-gradient(at 80% 80%, hsla(340, 100%, 76%, 0.1) 0px, transparent 50%)
+            `
+          }}
+        />
 
-      {/* Световые лучи */}
-      <motion.div
-        className="absolute top-0 left-1/4 w-[1px] h-[30vh] bg-gradient-to-b from-transparent via-blue-500/30 to-transparent"
-        style={{ transform: "rotate(10deg)" }}
-        animate={{ opacity: [0, 0.5, 0], height: ['30vh', '60vh', '30vh'] }}
-        transition={{ duration: 7, repeat: Infinity, repeatType: "reverse" }}
-      />
-      <motion.div
-        className="absolute top-0 right-1/3 w-[1px] h-[40vh] bg-gradient-to-b from-transparent via-purple-500/30 to-transparent"
-        style={{ transform: "rotate(-15deg)" }}
-        animate={{ opacity: [0, 0.6, 0], height: ['40vh', '70vh', '40vh'] }}
-        transition={{ duration: 9, repeat: Infinity, repeatType: "reverse", delay: 3 }}
-      />
-    </div>
+        {/* Анимированное северное сияние */}
+        <motion.div 
+          className="absolute inset-0 opacity-20"
+          animate={{
+            background: [
+              'linear-gradient(45deg, transparent 30%, rgba(147, 51, 234, 0.1) 50%, transparent 70%)',
+              'linear-gradient(45deg, transparent 30%, rgba(59, 130, 246, 0.1) 50%, transparent 70%)',
+              'linear-gradient(45deg, transparent 30%, rgba(147, 51, 234, 0.1) 50%, transparent 70%)',
+            ],
+          }}
+          transition={{
+            duration: 10,
+            repeat: Infinity,
+            ease: "linear"
+          }}
+          style={{
+            backgroundSize: '200% 200%',
+            backgroundPosition: '0% 0%',
+          }}
+        />
+
+        {/* Subtle сетка */}
+        <div 
+          className="absolute inset-0 opacity-[0.03]"
+          style={{
+            backgroundImage: `
+              linear-gradient(rgba(147, 51, 234, 0.3) 1px, transparent 1px),
+              linear-gradient(90deg, rgba(147, 51, 234, 0.3) 1px, transparent 1px)
+            `,
+            backgroundSize: '100px 100px'
+          }}
+        />
+
+        {/* Canvas для частиц */}
+        <canvas 
+          ref={canvasRef}
+          className="absolute inset-0 pointer-events-none"
+        />
+
+        {/* Виньетка для фокуса на контенте */}
+        <div 
+          className="absolute inset-0 pointer-events-none"
+          style={{
+            background: `
+              radial-gradient(ellipse at center, transparent 0%, rgba(0, 0, 0, 0.4) 100%)
+            `
+          }}
+        />
+      </div>
+    </>
   );
 };
 

@@ -14,6 +14,7 @@ import ORM from './pages/research/ORM/ORM';
 import Nodejswithexpress from './pages/research/Nodejswithexpress/Nodejswithexpress';
 import Docker from './pages/research/Docker/Docker';
 import PostgreSQL from './pages/research/PostgreSQL/PostgreSQL';
+import WebMotionDesign from './pages/research/WebMotionDesign/WebMotionDesign';
 
 // Импорт страниц для Custom Research
 import UMLArchitecturesPage from './pages/research/custom/uml-architectures/UMLArchitecturesPage';
@@ -50,12 +51,13 @@ const App = () => {
   const location = useLocation();
 
   return (
-    <div className="min-h-screen text-white bg-slate-900">
+    <>
       <AnimatedBackground />
-      <PreLoader />
-      {process.env.NODE_ENV === 'development' && <SimpleFPSCounter />}
-      <main className="relative z-10 min-h-screen">
+      <div className="min-h-screen text-white relative">
+        <PreLoader />
+        {process.env.NODE_ENV === 'development' && <SimpleFPSCounter />}
         <TopNav />
+        <main className="relative">
         <Routes>
           <Route path="/" element={<HomePage />} />
           
@@ -94,6 +96,7 @@ const App = () => {
           <Route path="/research/nodejswithexpress" element={<Nodejswithexpress />} />
           <Route path="/research/docker" element={<Docker />} />
           <Route path="/research/postgresql" element={<PostgreSQL />} />
+          <Route path="/research/webmotiondesign" element={<WebMotionDesign />} />
           
           {/* Маршруты для Custom Research */}
           <Route path="/research/custom/uml-architectures" element={<UMLArchitecturesPage />} />
@@ -102,9 +105,10 @@ const App = () => {
           <Route path="/research/custom/questions" element={<QuestionsPage />} />
           <Route path="/research/custom/advanced-research" element={<AdvancedResearchPage />} />
         </Routes>
+        </main>
         <Footer />
-      </main>
-    </div>
+      </div>
+    </>
   );
 };
 

@@ -1,0 +1,44 @@
+# Robots.txt для портфолио
+# Создан: 2025-01-23
+
+# Разрешаем всем ботам сканировать сайт
+User-agent: *
+Allow: /
+
+# Запрещаем индексацию технических директорий
+Disallow: /api/
+Disallow: /admin/
+Disallow: /.git/
+Disallow: /node_modules/
+Disallow: /src/
+Disallow: *.json$
+Disallow: *.map$
+
+# Специальные правила для основных поисковиков
+User-agent: Googlebot
+Crawl-delay: 1
+Allow: /
+
+User-agent: Yandex
+Crawl-delay: 2
+Allow: /
+Clean-param: utm_source&utm_medium&utm_campaign
+
+# Запрещаем плохих ботов (экономим трафик)
+User-agent: AhrefsBot
+Disallow: /
+
+User-agent: SemrushBot
+Disallow: /
+
+User-agent: MJ12bot
+Disallow: /
+
+User-agent: DotBot
+Disallow: /
+
+# Указываем расположение карты сайта
+Sitemap: https://denn999-dev.netlify.app/
+
+# Указываем хост (для Яндекса)
+Host: https://denn999-dev.netlify.app/

@@ -164,7 +164,7 @@ const globalCategories: Category[] = [
         textColor: '#ffffff',
         secondaryTextColor: '#9999FF',
         description: ' веб-анимации с GSAP и After Effects',
-        path: '/research/web-motion-design',
+        path: '/research/webmotiondesign',
       }
     ],
   },
