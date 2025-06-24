@@ -3,10 +3,10 @@ import { motion, AnimatePresence } from 'framer-motion';
 import { Icon } from '@iconify/react';
 
 // Импорт компонентов тем
-import { PrefaceIntro, DisneyPrinciplesVsDigital, ThreeDimensionalValue, PhysicsOfSensations, SpeedOfPerception, CharacterOfMovement, ThirdDimension, LoopingAnimation, MicroAnimations, TimeAsMaterial } from './components';
+import { PrefaceIntro, DisneyPrinciplesVsDigital, ThreeDimensionalValue, PhysicsOfSensations, SpeedOfPerception, CharacterOfMovement, ThirdDimension, LoopingAnimation, MicroAnimations, TimeAsMaterial, ChoreographyArt, InvisibleLayer, SmoothIllusion, FragmentationCurse, MovementMeaning, ToolsVsMastery, KineticTypography, AnimaticVsFinal, TrueAnticipation, VisualLanguage, GreatBalance } from './components';
 
 // Данные о темах
-const TOTAL_TOPICS = 10; // Включая тему про время
+const TOTAL_TOPICS = 21; // Включая все темы
 const topics = [
   { id: 0, title: "Предисловие: Переопределение Моушн-дизайна", component: PrefaceIntro },
   { id: 1, title: "Принципы Disney vs Digital", component: DisneyPrinciplesVsDigital },
@@ -18,6 +18,17 @@ const topics = [
   { id: 7, title: "Искусство Повторения — Магия и Проклятие Цикличной Анимации", component: LoopingAnimation },
   { id: 8, title: "Душа в Деталях — Микроанимации как Язык Обратной Связи", component: MicroAnimations },
   { id: 9, title: "Время как Материал — Искусство Управления Восприятием", component: TimeAsMaterial },
+  { id: 10, title: "Искусство Хореографии — Параллельная vs. Последовательная Анимация", component: ChoreographyArt },
+  { id: 11, title: "Невидимый Слой — Звук как Партнер Движения", component: InvisibleLayer },
+  { id: 12, title: "Иллюзия Плавности — Фреймрейт, Motion Blur и Технические Компромиссы", component: SmoothIllusion },
+  { id: 13, title: "Проклятие Фрагментации — Масштабируемость Моушн-дизайна", component: FragmentationCurse },
+  { id: 14, title: "Смысл Движения — Нарративный vs. Абстрактный Моушн-дизайн", component: MovementMeaning },
+  { id: 15, title: "Вечный Спор — Инструменты против Мастерства", component: ToolsVsMastery },
+  { id: 16, title: "Живое Слово — Баланс Читаемости и Выразительности в Кинетической Типографике", component: KineticTypography },
+  { id: 17, title: "Процесс и Результат — Почему Аниматик Важнее Финального Рендера", component: AnimaticVsFinal },
+  { id: 18, title: "Сила Намерения — Истинный Смысл \"Ожидания\" (Anticipation)", component: TrueAnticipation },
+  { id: 19, title: "Визуальный Язык — Стилизация против Реализма", component: VisualLanguage },
+  { id: 20, title: "Великий Баланс — Эмоциональный vs. Логический Моушн-дизайн", component: GreatBalance },
 ];
 
 const WebMotionDesign: React.FC = () => {
