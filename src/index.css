@@ -28,6 +28,55 @@ img {
 @tailwind components;
 @tailwind utilities;
 
+/* View Transitions API */
+@supports (view-transition-name: none) {
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation-duration: 0.3s;
+    animation-timing-function: cubic-bezier(0.4, 0, 0.2, 1);
+  }
+
+  ::view-transition-old(navigation),
+  ::view-transition-new(navigation) {
+    animation: none;
+  }
+
+  /* Плавные переходы для страниц */
+  .page-content {
+    view-transition-name: page-content;
+  }
+
+  ::view-transition-old(page-content) {
+    animation: fade-out 0.3s ease-out;
+  }
+
+  ::view-transition-new(page-content) {
+    animation: fade-in 0.3s ease-out;
+  }
+
+  @keyframes fade-out {
+    from {
+      opacity: 1;
+      transform: translateY(0);
+    }
+    to {
+      opacity: 0;
+      transform: translateY(-20px);
+    }
+  }
+
+  @keyframes fade-in {
+    from {
+      opacity: 0;
+      transform: translateY(20px);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0);
+    }
+  }
+}
+
 :root {
   font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
   line-height: 1.5;

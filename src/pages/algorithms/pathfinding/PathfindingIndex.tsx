@@ -85,27 +85,7 @@ const PathfindingIndex: React.FC<PathfindingIndexProps> = () => {
             </div>
           </motion.div>
 
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
-            className="opacity-50"
-          >
-            <div className="block p-6 bg-slate-800 rounded-lg border border-slate-700">
-              <div className="flex items-center gap-3 mb-3">
-                <div className="p-3 bg-gray-600/20 rounded-lg">
-                  <Icon icon="mdi:graph" className="w-6 h-6 text-gray-400" />
-                </div>
-                <h3 className="text-xl font-semibold">BFS Pathfinding</h3>
-              </div>
-              
-              <p className="text-slate-400 mb-4">
-                Поиск кратчайшего пути в невзвешенном графе методом поиска в ширину
-              </p>
-              
-              <div className="text-sm text-slate-500">Скоро будет доступно</div>
-            </div>
-          </motion.div>
+
         </div>
       </div>
     </div>

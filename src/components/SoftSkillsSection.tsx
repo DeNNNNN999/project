@@ -1,13 +1,7 @@
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import { motion, useMotionTemplate, useMotionValue, AnimatePresence } from 'motion/react'
-import gsap from 'gsap'
-import { ScrollTrigger } from 'gsap/ScrollTrigger'
+import { useInView } from 'react-intersection-observer'
 import { Icon } from '@iconify/react'
-
-
-if (typeof window !== 'undefined') {
-  gsap.registerPlugin(ScrollTrigger)
-}
 
 interface SoftSkill {
   name: string
@@ -19,12 +13,11 @@ interface SoftSkill {
 
 const softSkills: SoftSkill[] = [
   {
-    name: 'Лидерство',
-    icon: 'ph:crown-bold',
+    name: 'Архитектурное мышление',
+    icon: 'ph:blueprint-bold',
     gradient: 'from-amber-500 to-orange-600',
-    description: 'Умение вести команду к общей цели, вдохновлять и мотивировать коллег',
-
-    keywords: ['Мотивация', 'Видение', 'Стратегия', 'Делегирование']
+    description: 'Проектирование масштабируемых систем с учетом долгосрочной перспективы',
+    keywords: ['Паттерны', 'Масштабирование', 'SOLID', 'Модульность']
   },
   {
     name: 'Коммуникация',
@@ -74,51 +67,29 @@ const SkillCard = ({ skill, index }: { skill: SoftSkill; index: number }) => {
   const [isFlipped, setIsFlipped] = useState(false)
   const mouseX = useMotionValue(0)
   const mouseY = useMotionValue(0)
+  const { ref: inViewRef, inView } = useInView({
+    threshold: 0.1,
+    triggerOnce: false
+  })
 
+  // Комбинируем refs
   useEffect(() => {
-    const card = cardRef.current
-    if (!card) return
-
-    const handleMouseMove = (e: MouseEvent) => {
-      const rect = card.getBoundingClientRect()
-      const x = e.clientX - rect.left
-      const y = e.clientY - rect.top
-
-      const centerX = rect.width / 2
-      const centerY = rect.height / 2
-
-      const rotateX = (y - centerY) / 10
-      const rotateY = -(x - centerX) / 10
-
-      gsap.to(card, {
-        rotateX,
-        rotateY,
-        transformPerspective: 1000,
-        duration: 0.5,
-        ease: 'power2.out',
-      })
-
-      mouseX.set((x / rect.width) * 100)
-      mouseY.set((y / rect.height) * 100)
+    if (cardRef.current) {
+      inViewRef(cardRef.current)
     }
+  }, [inViewRef])
 
-    const handleMouseLeave = () => {
-      gsap.to(card, {
-        rotateX: 0,
-        rotateY: 0,
-        duration: 0.5,
-        ease: 'power2.out',
-      })
-    }
-
-    card.addEventListener('mousemove', handleMouseMove)
-    card.addEventListener('mouseleave', handleMouseLeave)
-
-    return () => {
-      card.removeEventListener('mousemove', handleMouseMove)
-      card.removeEventListener('mouseleave', handleMouseLeave)
-    }
-  }, [mouseX, mouseY])
+  // Упрощенный mouse tracking с throttle
+  const handleMouseMove = useCallback((e: React.MouseEvent<HTMLDivElement>) => {
+    if (!inView) return // Не обрабатываем если карточка не видна
+    
+    const rect = e.currentTarget.getBoundingClientRect()
+    const x = e.clientX - rect.left
+    const y = e.clientY - rect.top
+    
+    mouseX.set((x / rect.width) * 100)
+    mouseY.set((y / rect.height) * 100)
+  }, [mouseX, mouseY, inView])
 
   return (
     <motion.div
@@ -129,8 +100,12 @@ const SkillCard = ({ skill, index }: { skill: SoftSkill; index: number }) => {
       transition={{ delay: index * 0.1, duration: 0.6 }}
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
+      onMouseMove={handleMouseMove}
       onClick={() => setIsFlipped(!isFlipped)}
-      style={{ transformStyle: 'preserve-3d' }}
+      style={{ 
+        transformStyle: 'preserve-3d',
+        transform: inView ? undefined : 'translateY(50px)',
+      }}
     >
       <motion.div
         className="absolute inset-0"
@@ -151,47 +126,32 @@ const SkillCard = ({ skill, index }: { skill: SoftSkill; index: number }) => {
           {/* Градиентная подсветка */}
           <div className={`absolute inset-0 bg-gradient-to-br ${skill.gradient} opacity-15`} />
           
-          {/* Анимированные частицы */}
-          <div className="absolute inset-0">
-            {[...Array(5)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute w-3 h-3 bg-white/80 rounded-full"
-                style={{
-                  left: `${20 + i * 15}%`,
-                  top: `${10 + i * 20}%`,
-                  boxShadow: '0 0 10px rgba(255, 255, 255, 0.8)',
-                  filter: 'blur(0.5px)'
-                }}
-                animate={{
-                  y: [-20, 20, -20],
-                  x: [-10, 10, -10],
-                  scale: [1, 1.5, 1],
-                  opacity: [0.5, 1, 0.5]
-                }}
-                transition={{
-                  duration: 3 + i,
-                  repeat: Infinity,
-                  ease: 'easeInOut',
-                  delay: i * 0.5
-                }}
-              />
-            ))}
-          </div>
+          {/* Анимированные частицы - только при hover и видимости */}
+          <AnimatePresence>
+            {isHovered && inView && (
+              <div className="absolute inset-0">
+                {[...Array(2)].map((_, i) => (
+                  <motion.div
+                    key={i}
+                    className="absolute w-2 h-2 bg-white/60 rounded-full"
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1 }}
+                    exit={{ opacity: 0 }}
+                    style={{
+                      left: `${30 + i * 40}%`,
+                      top: `${30 + i * 30}%`,
+                    }}
+                  />
+                ))}
+              </div>
+            )}
+          </AnimatePresence>
           
-          {/* Бесконечная волна */}
-          <motion.div
-            className="absolute bottom-0 left-0 right-0 h-32"
+          {/* Статичная волна с CSS анимацией при hover */}
+          <div
+            className="absolute bottom-0 left-0 right-0 h-32 opacity-50 transition-opacity duration-300 hover:opacity-80"
             style={{
-              background: `linear-gradient(180deg, transparent, rgba(255,255,255,0.25))`,
-            }}
-            animate={{
-              backgroundPosition: ['0% 0%', '100% 100%', '0% 0%']
-            }}
-            transition={{
-              duration: 10,
-              repeat: Infinity,
-              ease: 'linear'
+              background: `linear-gradient(180deg, transparent, rgba(255,255,255,0.2))`,
             }}
           />
 
@@ -230,29 +190,11 @@ const SkillCard = ({ skill, index }: { skill: SoftSkill; index: number }) => {
             {/* Описание */}
             <p className="text-white/90 text-sm mb-6 flex-grow">{skill.description}</p>
 
-            {/* Анимированные орбиты */}
-            <div className="relative h-12 mb-4">
-              {[...Array(3)].map((_, i) => (
-                <motion.div
-                  key={i}
-                  className="absolute w-full h-[2px] bg-gradient-to-r from-transparent via-white/70 to-transparent"
-                  style={{ 
-                    top: `${i * 16}px`,
-                    filter: 'blur(0.5px)',
-                    boxShadow: '0 0 8px rgba(255, 255, 255, 0.5)'
-                  }}
-                  animate={{
-                    x: ['-100%', '100%'],
-                    opacity: [0, 1, 0]
-                  }}
-                  transition={{
-                    duration: 3,
-                    repeat: Infinity,
-                    delay: i * 0.5,
-                    ease: 'linear'
-                  }}
-                />
-              ))}
+            {/* Статичные линии */}
+            <div className="relative h-8 mb-4">
+              <div className="absolute inset-0 flex items-center">
+                <div className="w-full h-[1px] bg-gradient-to-r from-transparent via-white/30 to-transparent" />
+              </div>
             </div>
 
             {/* Кнопка переворота */}
@@ -282,30 +224,18 @@ const SkillCard = ({ skill, index }: { skill: SoftSkill; index: number }) => {
         >
           <div className={`absolute inset-0 bg-gradient-to-br ${skill.gradient} opacity-15`} />
           
-          {/* Круговые анимации */}
-          <div className="absolute inset-0">
-            {[...Array(3)].map((_, i) => (
-              <motion.div
-                key={i}
-                className="absolute border-2 border-white/35 rounded-full"
-                style={{
-                  width: `${100 + i * 50}px`,
-                  height: `${100 + i * 50}px`,
-                  left: '50%',
-                  top: '50%',
-                  transform: 'translate(-50%, -50%)'
-                }}
-                animate={{
-                  rotate: 360,
-                  scale: [1, 1.1, 1]
-                }}
-                transition={{
-                  duration: 10 + i * 5,
-                  repeat: Infinity,
-                  ease: 'linear'
-                }}
-              />
-            ))}
+          {/* Статичные круги с CSS hover эффектом */}
+          <div className="absolute inset-0 opacity-20">
+            <div 
+              className="absolute border border-white/20 rounded-full transition-transform duration-300 hover:scale-105"
+              style={{
+                width: '150px',
+                height: '150px',
+                left: '50%',
+                top: '50%',
+                transform: 'translate(-50%, -50%)'
+              }}
+            />
           </div>
           
           <div className="relative z-10 p-8 h-full flex flex-col">
@@ -353,30 +283,10 @@ const SkillCard = ({ skill, index }: { skill: SoftSkill; index: number }) => {
 
 const SoftSkillsSection = () => {
   const sectionRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    // Параллакс эффект для фона
-    gsap.to('.soft-skills-bg', {
-      y: '20%',
-      scrollTrigger: {
-        trigger: sectionRef.current,
-        start: 'top bottom',
-        end: 'bottom top',
-        scrub: 1,
-      },
-    })
-
-    // Анимация появления заголовка
-    gsap.from('.section-title', {
-      y: 50,
-      opacity: 0,
-      duration: 1,
-      scrollTrigger: {
-        trigger: '.section-title',
-        start: 'top 80%',
-      }
-    })
-  }, [])
+  const { ref: titleRef, inView: titleInView } = useInView({
+    threshold: 0.1,
+    triggerOnce: true
+  })
 
   return (
     <section ref={sectionRef} className="relative py-20 overflow-hidden">
@@ -385,7 +295,11 @@ const SoftSkillsSection = () => {
       <div className="relative z-10 px-4 mx-auto max-w-7xl">
         {/* Заголовок секции */}
         <motion.div
-          className="text-center mb-16 section-title"
+          ref={titleRef}
+          className="text-center mb-16"
+          initial={{ opacity: 0, y: 50 }}
+          animate={titleInView ? { opacity: 1, y: 0 } : { opacity: 0, y: 50 }}
+          transition={{ duration: 0.6 }}
         >
           <motion.div
             className="inline-flex items-center gap-3 mb-4 px-6 py-2 bg-purple-500/10 rounded-full"

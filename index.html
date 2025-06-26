@@ -4,7 +4,21 @@
     <meta charset="UTF-8" />
     <link rel="icon" type="image/svg+xml" href="/vite.svg" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="view-transition" content="same-origin" />
     <title>DeNNNNN999 | Full-Stack Developer</title>
+    <script>
+      // View Transitions API polyfill check
+      if (!document.startViewTransition) {
+        document.startViewTransition = (callback) => {
+          callback();
+          return {
+            finished: Promise.resolve(),
+            ready: Promise.resolve(),
+            updateCallbackDone: Promise.resolve()
+          };
+        };
+      }
+    </script>
   </head>
   <body>
     <div id="root"></div>

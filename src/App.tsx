@@ -57,7 +57,7 @@ const App = () => {
         <PreLoader />
         {process.env.NODE_ENV === 'development' && <SimpleFPSCounter />}
         <TopNav />
-        <main className="relative">
+        <main className="relative page-content">
         <Routes>
           <Route path="/" element={<HomePage />} />
           

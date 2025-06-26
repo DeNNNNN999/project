@@ -186,33 +186,6 @@ export const algorithms: Algorithm[] = [
     icon: 'mdi:map-marker-path',
     tags: ['graph', 'weighted', 'optimal']
   },
-  {
-    id: 'bfs',
-    name: 'BFS Pathfinding',
-    description: 'Поиск кратчайшего пути в невзвешенном графе методом поиска в ширину',
-    category: 'pathfinding',
-    path: '/algorithms/pathfinding/bfs',
-    complexity: {
-      time: 'O(V + E)',
-      space: 'O(V)'
-    },
-    icon: 'mdi:graph',
-    tags: ['unweighted', 'optimal', 'queue']
-  },
-  {
-    id: 'dfs',
-    name: 'DFS Pathfinding',
-    description: 'Поиск пути методом поиска в глубину',
-    category: 'pathfinding',
-    path: '/algorithms/pathfinding/dfs',
-    complexity: {
-      time: 'O(V + E)',
-      space: 'O(V)',
-      note: 'Не гарантирует кратчайший путь'
-    },
-    icon: 'mdi:graph-outline',
-    tags: ['stack', 'maze', 'backtracking']
-  },
 
   // Numerical Methods
   {
