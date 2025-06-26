@@ -1,7 +1,10 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { motion } from 'motion/react';
+import { Icon } from '@iconify/react';
 
 const SimpleFPSCounter: React.FC = () => {
   const [fps, setFps] = useState(0);
+  const [isMinimized, setIsMinimized] = useState(false);
   const frameRef = useRef(0);
   const lastTimeRef = useRef(performance.now());
   const frameCountRef = useRef(0);
@@ -42,15 +45,40 @@ const SimpleFPSCounter: React.FC = () => {
   };
 
   return (
-    <div
-      className="fixed top-4 right-4 z-[9999] px-3 py-2 bg-black/80 backdrop-blur-sm rounded-lg border border-gray-700/50 font-mono text-sm"
+    <motion.div
+      initial={{ opacity: 0, scale: 0.8 }}
+      animate={{ 
+        opacity: 1, 
+        scale: 1,
+        width: isMinimized ? 'auto' : 'auto'
+      }}
+      className="fixed top-20 right-4 z-[9999] bg-black/90 backdrop-blur-md rounded-lg border border-purple-500/30 font-mono text-sm shadow-lg cursor-pointer select-none"
       style={{
         color: getFPSColor(fps),
-        textShadow: '0 0 10px currentColor'
+        textShadow: '0 0 10px currentColor',
+        boxShadow: `0 0 20px ${getFPSColor(fps)}40`
       }}
+      onClick={() => setIsMinimized(!isMinimized)}
+      whileHover={{ scale: 1.05 }}
+      whileTap={{ scale: 0.95 }}
     >
-      {fps} FPS
-    </div>
+      <motion.div 
+        className="px-3 py-2"
+        animate={{ opacity: isMinimized ? 0.7 : 1 }}
+      >
+        {isMinimized ? (
+          <div className="flex items-center">
+            <span className="font-bold text-lg">{fps}</span>
+          </div>
+        ) : (
+          <div className="flex items-center gap-2">
+            <Icon icon="mdi:speedometer" className="w-4 h-4" />
+            <span className="font-bold">{fps}</span>
+            <span className="text-xs opacity-70">FPS</span>
+          </div>
+        )}
+      </motion.div>
+    </motion.div>
   );
 };
 

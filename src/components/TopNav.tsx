@@ -3,6 +3,7 @@ import { motion, AnimatePresence } from 'motion/react';
 import { Icon } from '@iconify/react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDebouncedCallback } from 'use-debounce';
+import SimpleFPSCounter from './SimpleFPSCounter';
 
 // Функция для View Transitions API
 const startViewTransition = (callback: () => void) => {
@@ -127,7 +128,9 @@ const TopNav = () => {
   }, [location.pathname, location.hash]);
 
   return (
-    <motion.nav
+    <>
+      <SimpleFPSCounter />
+      <motion.nav
       initial={{ y: -100 }}
       animate={{ y: 0 }}
       transition={{ type: "spring", stiffness: 100, damping: 20 }}
@@ -275,6 +278,7 @@ const TopNav = () => {
         )}
       </AnimatePresence>
     </motion.nav>
+    </>
   );
 };
 

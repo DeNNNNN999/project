@@ -44,7 +44,6 @@ import NewtonMethodPage from './pages/algorithms/numerical/NewtonMethodPage';
 
 import Footer from './components/Footer';
 import PreLoader from './components/PreLoader';
-import SimpleFPSCounter from './components/SimpleFPSCounter';
 import AnimatedBackground from './components/AnimatedBackground';
 
 const App = () => {
@@ -55,7 +54,6 @@ const App = () => {
       <AnimatedBackground />
       <div className="min-h-screen text-white relative">
         <PreLoader />
-        {process.env.NODE_ENV === 'development' && <SimpleFPSCounter />}
         <TopNav />
         <main className="relative page-content">
         <Routes>
